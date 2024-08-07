@@ -1,3 +1,4 @@
+import "jsr:@std/dotenv/load";
 import { startServer } from "./controller/express.ts";
 import { startWebSocketServer } from "./controller/websocket.ts";
 

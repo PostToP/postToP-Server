@@ -7,13 +7,13 @@ import {
   IRequestMusic,
   MessageType,
 } from "../interface/interface.ts";
-import { InsertNewMusic } from "../service/MusicService.ts";
+import { listenedToMusic } from "../service/MusicService.ts";
 
 export function startWebSocketServer(port: number) {
   const wss = new WebSocketServer(port);
   wss.on("connection", function (ws: WebSocketClient) {
     console.log(`New connection`);
-    ws.on("message", function (message: string) {
+    ws.on("message", async function (message: string) {
       const json = JSON.parse(message) as IRequest;
       console.log(json);
 
@@ -22,7 +22,7 @@ export function startWebSocketServer(port: number) {
           ws.send(JSON.stringify({ type: MessageType.PONG }));
           break;
         case MessageType.MUSIC:
-          InsertNewMusic(json.payload as IRequestMusic);
+          await listenedToMusic(json.payload as IRequestMusic);
           break;
         default:
           break;
