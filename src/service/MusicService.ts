@@ -38,8 +38,11 @@ async function isMusic(watchID: string) {
 
 async function isMusicAPI(watchID: string) {
   const lemnsolife = await fetch(
-    "https://yt.lemnoslife.com/videos?part=music&id=" + watchID
+    `https://www.googleapis.com/youtube/v3/videos?part=topicDetails&id=${watchID}&key=${Deno.env.get(
+      "YT_API_KEY"
+    )}`
   );
   const json = await lemnsolife.json();
-  return json.items[0].music.available as boolean;
+  const categories = json.items[0].topicDetails.topicCategories as string[];
+  return categories.includes("https://en.wikipedia.org/wiki/Music");
 }
