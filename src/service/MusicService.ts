@@ -1,17 +1,24 @@
-import { IRequestMusic } from "../interface/interface.ts";
-import { createFilterIfNotExists, insertVideo } from "../model/db.ts";
+import { IRequestMusic } from "../interface/interface";
+import {
+  createFilterIfNotExists,
+  insertGenres,
+  insertVideo,
+  IVideo,
+} from "../model/db";
 import {
   fetchLatestMusic,
   fetchTopMusic,
   insertMusicWatched,
   selectVideo,
-} from "../model/db.ts";
+} from "../model/db";
 
 export async function listenedToMusic(music: IRequestMusic) {
   const { watchID, artistID } = music;
-  const { cache, isMusic: musicFlag } = await isMusic(watchID);
-  if (!cache) insertVideo(watchID, artistID, musicFlag);
-  if (!musicFlag) return;
+  const exists = await selectVideo(watchID);
+  if (!exists) {
+    const isMusic = await cacheVideo(watchID, artistID);
+    if (!isMusic) return;
+  } else if (!exists.isMusic) return;
 
   insertMusicWatched(watchID);
   return;
@@ -29,20 +36,27 @@ export function filterMusic(watchID: string) {
   createFilterIfNotExists(watchID);
 }
 
-async function isMusic(watchID: string) {
-  const video = selectVideo(watchID);
-  if (video) return { cache: true, isMusic: video.isMusic };
-  const isMusicFlag = await isMusicAPI(watchID);
-  return { cache: false, isMusic: isMusicFlag };
+async function cacheVideo(watchID: string, artistID: string): Promise<IVideo> {
+  const flags = await pullYTAPIFlags(watchID);
+  const isMusic = flags.includes("Music");
+  insertVideo(watchID, artistID, isMusic);
+  if (isMusic) {
+    const genres = flags.filter((i) => i !== "Music");
+    if (genres.length == 0) return { ID: watchID, artistID, isMusic };
+    insertGenres(watchID, genres);
+  }
+  return { ID: watchID, artistID, isMusic };
 }
 
-async function isMusicAPI(watchID: string) {
+async function pullYTAPIFlags(watchID: string) {
   const lemnsolife = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=topicDetails&id=${watchID}&key=${Deno.env.get(
-      "YT_API_KEY"
-    )}`
+    `https://www.googleapis.com/youtube/v3/videos?part=topicDetails&id=${watchID}&key=${process.env.YT_API_KEY}`
   );
   const json = await lemnsolife.json();
-  const categories = json.items[0].topicDetails.topicCategories as string[];
-  return categories.includes("https://en.wikipedia.org/wiki/Music");
+  let categories = json.items[0]?.topicDetails?.topicCategories as string[];
+  if (!categories) return [];
+  categories = categories.map((i) =>
+    i.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
+  );
+  return categories;
 }

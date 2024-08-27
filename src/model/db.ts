@@ -1,10 +1,11 @@
-import { DB, RowObject } from "https://deno.land/x/sqlite@v3.8/mod.ts";
-console.log(Deno.env.get("DB_PATH"));
-const db = new DB(Deno.env.get("DB_PATH") || "./db.sqlite");
-initializeDB();
+import Database from "better-sqlite3";
+console.log(process.env.DB_PATH);
+const db = new Database(process.env.DB_PATH || "./db.sqlite");
+db.pragma("journal_mode = WAL");
 
+initializeDB();
 function initializeDB() {
-  db.execute(`
+  db.exec(`
   CREATE TABLE IF NOT EXISTS watched (
     musicID TEXT,
     datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -21,19 +22,25 @@ function initializeDB() {
     videoID TEXT,
     PRIMARY KEY (videoID)
   );
+  CREATE TABLE IF NOT EXISTS video_genre (
+    videoID TEXT,
+    genre TEXT,
+    PRIMARY KEY (videoID, genre),
+    FOREIGN KEY (videoID) REFERENCES video(ID)
+  );
 `);
 }
 
-interface IVideo extends RowObject {
+export interface IVideo {
   ID: string;
   artistID: string;
   isMusic: boolean;
 }
-interface IWatched extends RowObject {
+interface IWatched {
   musicID: string;
   datetime: string;
 }
-interface IFilter extends RowObject {
+interface IFilter {
   videoID: string;
 }
 
@@ -55,7 +62,7 @@ export function insertVideo(
   artistID: string,
   isMusic: boolean
 ) {
-  return db.query(
+  return NonQuery(
     `INSERT INTO video (ID, artistID, isMusic)
     SELECT ?, ?, ?
     WHERE NOT EXISTS (SELECT 1 FROM video WHERE ID = ?)`,
@@ -64,7 +71,19 @@ export function insertVideo(
 }
 
 export function insertMusicWatched(musicID: string) {
-  return db.query(`INSERT INTO watched (musicID) VALUES (?)`, [musicID]);
+  return NonQuery(`INSERT INTO watched (musicID) VALUES (?)`, [musicID]);
+}
+
+export function insertGenres(videoID: string, genres: string[]) {
+  const values = genres.map((genre) => `('${videoID}', '${genre}')`).join(", ");
+  return NonQuery(
+    `INSERT INTO video_genre (videoID, genre)
+    SELECT * FROM (VALUES ${values})
+    WHERE NOT EXISTS (SELECT 1 FROM video_genre WHERE videoID = ? AND genre IN (${genres
+      .map(() => "?")
+      .join(", ")}))`,
+    [videoID, ...genres]
+  );
 }
 
 export function fetchTopMusic(limit: number, from: Date, to: Date) {
@@ -110,21 +129,50 @@ export function fetchTopArtists(limit: number = 5, from: Date, to: Date) {
   );
 }
 
+export function fetchTopGenres(limit: number = 5, from: Date, to: Date) {
+  return Query<{ genre: string; times: number }>(
+    ` SELECT genre,
+        Count(genre) as times
+      FROM   (SELECT genre
+        FROM   video_genre
+        JOIN watched ON video_genre.videoID = watched.musicID
+        WHERE  datetime >= ?
+               AND datetime <= ?)
+      GROUP  BY genre
+      ORDER  BY Count(genre) DESC
+      LIMIT  ?`,
+    [to.toISOString(), from.toISOString(), limit]
+  );
+}
+
 export function all() {
   const watched = Query<IWatched>(`SELECT * FROM watched`);
   const video = Query<IWatched>(`SELECT * FROM video`);
   const filter = Query<IWatched>(`SELECT * FROM filter`);
-  return { watched, video, filter };
+  const genres = Query<IWatched>(`SELECT * FROM video_genre`);
+  return { watched, video, filter, genres };
 }
 
-function Query<T extends RowObject>(query: string, args: any[] = []) {
-  return db.queryEntries<T>(query, args) as T[];
+function TransformParams(params: any[] = []) {
+  return params.map((param) => {
+    if (param instanceof Date) {
+      return param.toISOString();
+    }
+    if (typeof param === "boolean") {
+      return param ? 1 : 0;
+    }
+    return param;
+  });
 }
 
-function Single<T extends RowObject>(query: string, args: any[] = []) {
-  return Query<T>(query, args)[0];
+function Query<T>(query: string, args: any[] = []) {
+  return db.prepare(query).all(...TransformParams(args)) as T[];
+}
+
+function Single<T>(query: string, args: any[] = []) {
+  return db.prepare(query).get(...TransformParams(args)) as T;
 }
 
 function NonQuery(query: string, args: any[] = []) {
-  db.query(query, args);
+  return db.prepare(query).run(...TransformParams(args));
 }

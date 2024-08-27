@@ -1,20 +1,26 @@
-import express, { Request, Response, NextFunction } from "npm:express@4.18.2";
-import json from "npm:body-parser@1.19.0";
-import cors from "npm:cors@2.8.5";
-import { IRequestQuery } from "../interface/interface.ts";
+import express, { Request, Response, NextFunction } from "express";
+import { urlencoded, json } from "body-parser";
+import cors from "cors";
+import { IRequestQuery } from "../interface/interface";
 import {
   filterMusic,
   getLatestMusic,
   getTopMusic,
-} from "../service/MusicService.ts";
-import { getTopArtists } from "../service/ArtistService.ts";
-import { Validate } from "../utils.ts";
-import { InvalidArgumentError } from "../interface/errors.ts";
-import { all } from "../model/db.ts";
+} from "../service/MusicService";
+import { getTopArtists } from "../service/ArtistService";
+import { Validate } from "../utils";
+import { InvalidArgumentError } from "../interface/errors";
+import { all } from "../model/db";
+import { getTopGenres } from "../service/GenreService";
 
 export function startServer(port: number) {
   const app = express();
 
+  app.use(
+    urlencoded({
+      extended: true,
+    })
+  );
   app.use(json());
   app.use(cors());
 
@@ -23,7 +29,7 @@ export function startServer(port: number) {
   });
 
   app.get("/artist", (req: Request, res: Response) => {
-    const query = req.query as IRequestQuery;
+    const query = req.query;
     let from = Validate(query?.from)
       .nonRequired(new Date())
       .date("from is invalid")
@@ -48,7 +54,7 @@ export function startServer(port: number) {
   });
 
   app.get("/music", (req: Request, res: Response) => {
-    const query = req.query as IRequestQuery;
+    const query = req.query;
 
     const sortBy = Validate(query?.sortBy)
       .nonRequired("top")
@@ -77,6 +83,31 @@ export function startServer(port: number) {
         .status(200)
         .json(getTopMusic(new Date(from), new Date(to), limit));
     if (sortBy === "latest") return res.status(200).json(getLatestMusic(limit));
+  });
+
+  app.get("/genre", (req: Request, res: Response) => {
+    const query = req.query;
+    let from = Validate(query?.from)
+      .nonRequired(new Date())
+      .date("from is invalid")
+      .unwrap<Date>();
+    let to = Validate(query?.to)
+      .nonRequired(new Date())
+      .date("to is invalid")
+      .unwrap<Date>();
+    const limit = Validate(query?.limit)
+      .nonRequired(5)
+      .number("limit must be a number")
+      .unwrap<number>();
+
+    if (to > from) {
+      const temp = from;
+      from = to;
+      to = temp;
+    }
+
+    res.status(200).json(getTopGenres(new Date(from), new Date(to), limit));
+    return;
   });
 
   app.post("/filter", (req: Request, res: Response) => {

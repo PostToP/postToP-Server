@@ -1,10 +1,17 @@
-FROM denoland/deno:alpine
-
+FROM node:20-alpine AS build
 WORKDIR /app
-
+COPY package*.json .
+RUN npm install
 COPY . .
+RUN npm run build
 
-EXPOSE 8000
+FROM node:20-alpine AS production
+WORKDIR /app
+COPY package*.json .
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+
 EXPOSE 8080
+EXPOSE 8000
 
-CMD ["run", "--allow-net", "--allow-read", "--allow-write", "--allow-env","src/index.ts"]
+CMD ["node", "dist/index.js"]

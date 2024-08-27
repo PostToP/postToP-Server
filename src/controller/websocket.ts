@@ -1,17 +1,10 @@
-import {
-  WebSocketClient,
-  WebSocketServer,
-} from "https://deno.land/x/websocket@v0.1.4/mod.ts";
-import {
-  IRequest,
-  IRequestMusic,
-  MessageType,
-} from "../interface/interface.ts";
-import { listenedToMusic } from "../service/MusicService.ts";
+import { WebSocketServer } from "ws";
+import { IRequest, IRequestMusic, MessageType } from "../interface/interface";
+import { listenedToMusic } from "../service/MusicService";
 
 export function startWebSocketServer(port: number) {
-  const wss = new WebSocketServer(port);
-  wss.on("connection", function (ws: WebSocketClient) {
+  const wss = new WebSocketServer({ port: port });
+  wss.on("connection", function (ws: any) {
     console.log(`New connection`);
     ws.on("message", async function (message: string) {
       const json = JSON.parse(message) as IRequest;

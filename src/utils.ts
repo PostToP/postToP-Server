@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from "./interface/errors.ts";
+import { InvalidArgumentError } from "./interface/errors";
 
 class ValidatorMonad {
   private value: any;
