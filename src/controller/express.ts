@@ -12,6 +12,7 @@ import { Validate } from "../utils";
 import { InvalidArgumentError } from "../interface/errors";
 import { all } from "../model/db";
 import { getTopGenres } from "../service/GenreService";
+import { wss } from "./websocket";
 
 export function startServer(port: number) {
   const app = express();
@@ -131,5 +132,10 @@ export function startServer(port: number) {
     res.status(500).json({ message: "Internal Server Error" });
   });
 
-  app.listen(port);
+  const server = app.listen(port);
+  server.on("upgrade", (req, socket, head) => {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req);
+    });
+  });
 }
