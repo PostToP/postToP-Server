@@ -1,11 +1,22 @@
 import { WebSocketServer } from "ws";
 import { IRequest, IRequestMusic, MessageType } from "../interface/interface";
 import { listenedToMusic } from "../service/MusicService";
+import { AuthenticatedRequest } from "./express";
 
 export const wss = new WebSocketServer({ noServer: true });
-wss.on("connection", function (ws: any) {
+wss.on("connection", function (ws: any, req: AuthenticatedRequest) {
   console.log(`New connection`);
   ws.on("message", async function (message: string) {
+    // Unauthenticated clients can't send messages
+    if (req.isAuthenticated === false) {
+      ws.send(
+        JSON.stringify({
+          type: "ERROR",
+          payload: "Not authenticated",
+        })
+      );
+      return;
+    }
     const json = JSON.parse(message) as IRequest;
     console.log(json);
 

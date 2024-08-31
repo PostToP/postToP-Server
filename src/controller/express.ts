@@ -13,6 +13,12 @@ import { InvalidArgumentError } from "../interface/errors";
 import { all } from "../model/db";
 import { getTopGenres } from "../service/GenreService";
 import { wss } from "./websocket";
+import { parse } from "url";
+import { IncomingMessage } from "http";
+
+export interface AuthenticatedRequest extends IncomingMessage {
+  isAuthenticated?: boolean;
+}
 
 export function startServer(port: number) {
   const app = express();
@@ -133,9 +139,17 @@ export function startServer(port: number) {
   });
 
   const server = app.listen(port);
-  server.on("upgrade", (req, socket, head) => {
+  server.on("upgrade", (req: AuthenticatedRequest, socket, head) => {
+    req.isAuthenticated = authenticate(req);
+
     wss.handleUpgrade(req, socket, head, (ws) => {
       wss.emit("connection", ws, req);
     });
   });
+}
+
+function authenticate(request: IncomingMessage) {
+  if (!request.url) return false;
+  const { token } = parse(request.url, true).query;
+  return token === process.env.TOKEN;
 }
