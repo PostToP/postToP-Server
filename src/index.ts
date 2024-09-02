@@ -4,13 +4,17 @@ import { startServer } from "./controller/express";
 import { db } from "./model/db";
 import { wss } from "./controller/websocket";
 
-startServer(8000);
+process.stdin.resume();
 
-process.on("SIGTERM", () => {
-  console.info("SIGTERM signal received.");
-  wss.close(() => {
-    console.log("Websocket server closed");
-    db.close();
-    process.exit(0);
-  });
-});
+function exitHandler() {
+  console.log("Closing database and websocket");
+  db.close();
+  wss.close();
+  process.exit(0);
+}
+
+process.on("exit", exitHandler.bind(null));
+process.on("SIGINT", exitHandler.bind(null));
+process.on("SIGTERM", exitHandler.bind(null));
+
+startServer(8000);
