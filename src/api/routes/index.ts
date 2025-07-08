@@ -7,7 +7,7 @@ import { filterMusicRequestHandler, getMusicRequestHandler } from "../controller
 import { getGenresRequestHandler } from "../controllers/genre.controller";
 import { processErrorMiddleware } from "../middleware/error.middleware";
 
-export function setupRoutes() {
+export function setupAPIRoutes() {
     const app = express();
 
     app.use(
