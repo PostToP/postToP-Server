@@ -1,15 +1,8 @@
+import { createFilterIfNotExists } from "../database/queries/filter.queries";
+import { insertGenres } from "../database/queries/genre.queries";
+import { fetchLatestMusic, fetchTopMusic, insertMusicWatched } from "../database/queries/music.queries";
+import { insertVideo, selectVideo } from "../database/queries/video.queries";
 import { IRequestMusic } from "../interface/interface";
-import {
-  createFilterIfNotExists,
-  insertGenres,
-  insertVideo,
-} from "../database";
-import {
-  fetchLatestMusic,
-  fetchTopMusic,
-  insertMusicWatched,
-  selectVideo,
-} from "../database";
 
 export async function listenedToMusic(music: IRequestMusic) {
   const { watchID, artistID } = music;

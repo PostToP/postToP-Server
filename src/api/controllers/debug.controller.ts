@@ -1,5 +1,5 @@
-import { all } from "../../database";
 import { Request, Response } from "express";
+import { all } from "../../database/queries/misc.queries";
 
 export async function getDebugRequestHandler(_req: Request, res: Response) {
     try {

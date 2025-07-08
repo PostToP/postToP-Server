@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { db } from "./database";
+import { DatabaseManager } from "./database";
 import { addWebsocketUpgradeHandler, setupWebSocketServer } from "./websocket";
 import { setupAPIRoutes } from "./api/routes";
 process.stdin.resume();
 
-export function startServer(port: number) {
+async function startServer(port: number) {
+  await DatabaseManager.initialize()
   const express = setupAPIRoutes();
   const server = express.listen(port);
   console.log(`Server is running on port ${port}`);
@@ -14,7 +15,7 @@ export function startServer(port: number) {
 
   function exitHandler(signal?: string) {
     console.log(`Closing database and websocket${signal ? ` (${signal})` : ""}`);
-    let dbClosed = db.destroy().then(() => {
+    let dbClosed = DatabaseManager.close().then(() => {
       console.log("Database connection closed")
     });
     let expressClosed = server.close(() => {
