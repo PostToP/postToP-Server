@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "build": "tsc",
+    "build": "tsgo",
     "serve": "node dist/index.js"
   },
   "keywords": [],
@@ -12,11 +12,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@typescript/native-preview": "^7.0.0-dev.20250708.1",
     "better-sqlite3": "^11.2.1",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "kysely": "^0.28.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {
