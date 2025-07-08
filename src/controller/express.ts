@@ -31,8 +31,14 @@ export function startServer(port: number) {
   app.use(json());
   app.use(cors());
 
-  app.get("/debug", (_req: Request, res: Response) => {
-    res.status(200).json(all());
+  app.get("/debug", async (_req: Request, res: Response) => {
+    try {
+      const data = await all();
+      res.status(200).json(data);
+    } catch (error) {
+      console.error("Debug endpoint error:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   });
 
   app.get("/artist", (req: Request, res: Response) => {
