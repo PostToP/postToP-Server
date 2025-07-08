@@ -117,7 +117,7 @@ export function startServer(port: number) {
     return;
   });
 
-  app.post("/filter", (req: Request, res: Response) => {
+  app.post("/filter", async (req: Request, res: Response) => {
     const body = req.body as { watchID: string };
 
     Validate(body?.watchID)
@@ -125,7 +125,7 @@ export function startServer(port: number) {
       .string("watchID must be a string")
       .regex(/^[a-zA-Z0-9_-]{11}$/, "watchID is invalid");
 
-    filterMusic(body.watchID);
+    await filterMusic(body.watchID);
     return res.status(200).json({ message: "Filtered" });
   });
 

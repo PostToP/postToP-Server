@@ -3,7 +3,6 @@ import {
   createFilterIfNotExists,
   insertGenres,
   insertVideo,
-  IVideo,
 } from "../model/db";
 import {
   fetchLatestMusic,
@@ -16,11 +15,11 @@ export async function listenedToMusic(music: IRequestMusic) {
   const { watchID, artistID } = music;
   const exists = await selectVideo(watchID);
   if (!exists) {
-    const isMusic = await cacheVideo(watchID, artistID);
-    if (!isMusic) return;
+    const video = await cacheVideo(watchID, artistID);
+    if (!video.isMusic) return;
   } else if (!exists.isMusic) return;
 
-  insertMusicWatched(watchID);
+  await insertMusicWatched(watchID);
   return;
 }
 
@@ -32,20 +31,21 @@ export function getTopMusic(from: Date, to: Date, limit: number = 10) {
   return fetchTopMusic(limit, from, to);
 }
 
-export function filterMusic(watchID: string) {
-  createFilterIfNotExists(watchID);
+export async function filterMusic(watchID: string) {
+  await createFilterIfNotExists(watchID);
 }
 
-async function cacheVideo(watchID: string, artistID: string): Promise<IVideo> {
+async function cacheVideo(watchID: string, artistID: string): Promise<any> {
   const flags = await pullYTAPIFlags(watchID);
   const isMusic = flags.includes("Music");
-  insertVideo(watchID, artistID, isMusic);
+  await insertVideo(watchID, artistID, isMusic);
   if (isMusic) {
     const genres = flags.filter((i) => i !== "Music");
-    if (genres.length == 0) return { ID: watchID, artistID, isMusic };
-    insertGenres(watchID, genres);
+    if (genres.length > 0) {
+      await insertGenres(watchID, genres);
+    }
   }
-  return { ID: watchID, artistID, isMusic };
+  return { ID: watchID, artistID, isMusic: isMusic ? 1 : 0 };
 }
 
 async function pullYTAPIFlags(watchID: string) {
