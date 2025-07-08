@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { startServer } from "./controller/express";
-import { db } from "./model/db";
-import { wss } from "./controller/websocket";
-
+import { db } from "./database";
+import { wss } from "./websocket/websocket";
+import { parse } from "url";
+import { IncomingMessage } from "http";
+import { setupRoutes } from "./api/routes";
 process.stdin.resume();
 
 async function exitHandler(signal?: string) {
@@ -30,5 +31,28 @@ process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
   exitHandler("uncaughtException");
 });
+
+
+export interface AuthenticatedRequest extends IncomingMessage {
+  isAuthenticated?: boolean;
+}
+
+export function startServer(port: number) {
+  const express = setupRoutes();
+  const server = express.listen(port);
+  server.on("upgrade", (req: AuthenticatedRequest, socket, head) => {
+    req.isAuthenticated = authenticate(req);
+
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit("connection", ws, req);
+    });
+  });
+}
+
+function authenticate(request: IncomingMessage) {
+  if (!request.url) return false;
+  const { token } = parse(request.url, true).query;
+  return token === process.env.TOKEN;
+}
 
 startServer(8000);

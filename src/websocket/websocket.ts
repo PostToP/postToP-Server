@@ -1,7 +1,7 @@
 import { WebSocketServer } from "ws";
 import { IRequest, IRequestMusic, MessageType } from "../interface/interface";
-import { listenedToMusic } from "../service/MusicService";
-import { AuthenticatedRequest } from "./express";
+import { listenedToMusic } from "../services/music.service";
+import { AuthenticatedRequest } from "..";
 
 export const wss = new WebSocketServer({ noServer: true });
 wss.on("connection", function (ws: any, req: AuthenticatedRequest) {

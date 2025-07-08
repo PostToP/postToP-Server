@@ -3,13 +3,13 @@ import {
   createFilterIfNotExists,
   insertGenres,
   insertVideo,
-} from "../model/db";
+} from "../database";
 import {
   fetchLatestMusic,
   fetchTopMusic,
   insertMusicWatched,
   selectVideo,
-} from "../model/db";
+} from "../database";
 
 export async function listenedToMusic(music: IRequestMusic) {
   const { watchID, artistID } = music;
