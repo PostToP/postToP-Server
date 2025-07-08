@@ -1,6 +1,6 @@
 import { DatabaseManager } from "..";
 
-export async function all() {
+export async function fetchAll() {
     const db = DatabaseManager.getInstance();
     const watched = await db.selectFrom('watched').selectAll().execute();
     const video = await db.selectFrom('video').selectAll().execute();

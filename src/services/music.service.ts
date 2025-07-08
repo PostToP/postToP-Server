@@ -1,12 +1,12 @@
-import { createFilterIfNotExists } from "../database/queries/filter.queries";
+import { insertFilter } from "../database/queries/filter.queries";
 import { insertGenres } from "../database/queries/genre.queries";
 import { fetchLatestMusic, fetchTopMusic, insertMusicWatched } from "../database/queries/music.queries";
-import { insertVideo, selectVideo } from "../database/queries/video.queries";
+import { insertVideo, fetchVideo } from "../database/queries/video.queries";
 import { IRequestMusic } from "../interface/interface";
 
 export async function listenedToMusic(music: IRequestMusic) {
   const { watchID, artistID } = music;
-  const exists = await selectVideo(watchID);
+  const exists = await fetchVideo(watchID);
   if (!exists) {
     const video = await cacheVideo(watchID, artistID);
     if (!video.isMusic) return;
@@ -25,7 +25,7 @@ export function getTopMusic(from: Date, to: Date, limit: number = 10) {
 }
 
 export async function filterMusic(watchID: string) {
-  await createFilterIfNotExists(watchID);
+  await insertFilter(watchID);
 }
 
 async function cacheVideo(watchID: string, artistID: string): Promise<any> {

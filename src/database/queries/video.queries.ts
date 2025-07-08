@@ -1,6 +1,6 @@
 import { DatabaseManager } from "..";
 
-export async function selectVideo(videoID: string) {
+export async function fetchVideo(videoID: string) {
     const db = DatabaseManager.getInstance();
     return db
         .selectFrom('video')
