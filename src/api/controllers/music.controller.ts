@@ -31,8 +31,8 @@ export async function getMusicRequestHandler(req: Request, res: Response) {
     if (sortBy === "top")
         return res
             .status(200)
-            .json(getTopMusic(new Date(from), new Date(to), limit));
-    if (sortBy === "latest") return res.status(200).json(getLatestMusic(limit));
+            .json(await getTopMusic(new Date(from), new Date(to), limit));
+    if (sortBy === "latest") return res.status(200).json(await getLatestMusic(limit));
 }
 
 export async function filterMusicRequestHandler(req: Request, res: Response) {

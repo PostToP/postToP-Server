@@ -23,6 +23,6 @@ export async function getArtistRequestHandler(req: Request, res: Response) {
         to = temp;
     }
 
-    res.status(200).json(getTopArtists(new Date(from), new Date(to), limit));
+    res.status(200).json(await getTopArtists(new Date(from), new Date(to), limit));
     return;
 }

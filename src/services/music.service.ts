@@ -1,26 +1,41 @@
+import { insertArtist } from "../database/queries/artist.queries";
 import { insertFilter } from "../database/queries/filter.queries";
-import { insertGenres } from "../database/queries/genre.queries";
+import { insertCategories, insertCategoriesToVideo } from "../database/queries/genre.queries";
 import { fetchLatestMusic, fetchTopMusic, insertMusicWatched } from "../database/queries/music.queries";
-import { insertVideo, fetchVideo } from "../database/queries/video.queries";
+import { insertVideo, fetchVideo, insertSingleMetadata, fetchIsMusic } from "../database/queries/video.queries";
 import { IRequestMusic } from "../interface/interface";
+import { YouTubeApiResponse } from "../interface/youtube";
 
 export async function listenedToMusic(music: IRequestMusic) {
-  const { watchID, artistID } = music;
+  const { watchID } = music;
   const exists = await fetchVideo(watchID);
+  let ID = exists?.id;
   if (!exists) {
-    const video = await cacheVideo(watchID, artistID);
-    if (!video.isMusic) return;
-  } else if (!exists.isMusic) return;
+    const yt_video_details = await getYoutubeVideoDetails(watchID);
+    if (!yt_video_details) {
+      console.error(`Failed to fetch YouTube video details for ${watchID}`);
+      return;
+    }
+    ID = await addNewVideoToDatabase(yt_video_details);
 
-  await insertMusicWatched(watchID);
+  }
+  if (!ID) {
+    console.error(`Failed to insert or fetch video ID for ${watchID}`);
+    return;
+  }
+  if ((await fetchIsMusic(ID)) == null) {
+    return;
+  }
+
+  await insertMusicWatched(ID);
   return;
 }
 
-export function getLatestMusic(limit: number = 10) {
+export async function getLatestMusic(limit: number = 10) {
   return fetchLatestMusic(limit);
 }
 
-export function getTopMusic(from: Date, to: Date, limit: number = 10) {
+export async function getTopMusic(from: Date, to: Date, limit: number = 10) {
   return fetchTopMusic(limit, from, to);
 }
 
@@ -28,28 +43,70 @@ export async function filterMusic(watchID: string) {
   await insertFilter(watchID);
 }
 
-async function cacheVideo(watchID: string, artistID: string): Promise<any> {
-  const flags = await pullYTAPIFlags(watchID);
-  const isMusic = flags.includes("Music");
-  await insertVideo(watchID, artistID, isMusic);
-  if (isMusic) {
-    const genres = flags.filter((i) => i !== "Music");
-    if (genres.length > 0) {
-      await insertGenres(watchID, genres);
-    }
+function convertDuration(duration: string): number {
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) {
+    return 0;
   }
-  return { ID: watchID, artistID, isMusic: isMusic ? 1 : 0 };
+  const hours = match[1] ? parseInt(match[1], 10) : 0;
+  const minutes = match[2] ? parseInt(match[2], 10) :
+    0;
+  const seconds = match[3] ? parseInt(match[3], 10) :
+    0;
+  return hours * 3600 + minutes * 60 + seconds;
 }
 
-async function pullYTAPIFlags(watchID: string) {
-  const lemnsolife = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=topicDetails&id=${watchID}&key=${process.env.YT_API_KEY}`
+async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
+  const artistID = await insertArtist(yt_video_details.items[0].snippet.channelId, yt_video_details.items[0].snippet.channelTitle);
+  if (!artistID) {
+    console.error(`Failed to insert artist: ${yt_video_details.items[0].snippet.channelId}`);
+    return;
+  }
+  const categoriesID = await insertCategories(yt_video_details.items[0].topicDetails.topicCategories);
+  const videoID = await insertVideo(
+    yt_video_details.items[0].id,
+    artistID.id,
+    convertDuration(yt_video_details.items[0].contentDetails.duration),
+    Number(yt_video_details.items[0].snippet.categoryId),
+    yt_video_details.items[0].snippet.defaultAudioLanguage || "en"
   );
-  const json = await lemnsolife.json();
-  let categories = json.items[0]?.topicDetails?.topicCategories as string[];
-  if (!categories) return [];
-  categories = categories.map((i) =>
-    i.replace("https://en.wikipedia.org/wiki/", "").replace("_", " ")
-  );
-  return categories;
+  if (!videoID) {
+    console.error(`Failed to insert video: ${yt_video_details.items[0].id}`);
+    return;
+  }
+  await insertCategoriesToVideo(videoID.id, categoriesID.map((i) => i.id));
+  const item = yt_video_details.items[0];
+  const languages = item.localizations || {};
+  const defaultLanguage = item.snippet.defaultLanguage || item.snippet.defaultAudioLanguage || "undefined";
+  const defaultTitle = item.snippet.title;
+  const defaultDescription = item.snippet.description;
+  await insertSingleMetadata(videoID.id, defaultLanguage, defaultTitle, defaultDescription);
+  for (const [lang, localization] of Object.entries(languages)) {
+    if (lang === defaultLanguage) continue;
+    await insertSingleMetadata(videoID.id, lang, localization.title, localization.description);
+  }
+  return videoID.id;
+}
+
+
+
+async function getYoutubeVideoDetails(videoId: string): Promise<YouTubeApiResponse | null> {
+  const baseUrl = "https://youtube.googleapis.com/youtube/v3/videos";
+  const params = new URLSearchParams({
+    part: "snippet,topicDetails,localizations,contentDetails",
+    id: videoId,
+    key: process.env.YT_API_KEY || "TODO"
+  });
+  const url = `${baseUrl}?${params.toString()}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json() as YouTubeApiResponse;
+    return data;
+  } catch (error) {
+    console.error('Error fetching YouTube video details:', error);
+    return null;
+  }
 }

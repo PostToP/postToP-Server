@@ -23,6 +23,6 @@ export async function getGenresRequestHandler(req: Request, res: Response) {
         to = temp;
     }
 
-    res.status(200).json(getTopGenres(new Date(from), new Date(to), limit));
+    res.status(200).json(await getTopGenres(new Date(from), new Date(to), limit));
     return;
 }
