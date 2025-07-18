@@ -5,6 +5,7 @@ import { fetchLatestMusic, fetchTopMusic, insertMusicWatched } from "../database
 import { insertVideo, fetchVideo, insertSingleMetadata, fetchIsMusic } from "../database/queries/video.queries";
 import { IRequestMusic } from "../interface/interface";
 import { YouTubeApiResponse } from "../interface/youtube";
+import { logger } from "../utils/logger";
 
 export async function listenedToMusic(music: IRequestMusic) {
   const { watchID } = music;
@@ -13,14 +14,14 @@ export async function listenedToMusic(music: IRequestMusic) {
   if (!exists) {
     const yt_video_details = await getYoutubeVideoDetails(watchID);
     if (!yt_video_details) {
-      console.error(`Failed to fetch YouTube video details for ${watchID}`);
+      logger.error(`Failed to fetch YouTube video details for ${watchID}`);
       return;
     }
     ID = await addNewVideoToDatabase(yt_video_details);
 
   }
   if (!ID) {
-    console.error(`Failed to insert or fetch video ID for ${watchID}`);
+    logger.error(`Failed to insert or fetch video ID for ${watchID}`);
     return;
   }
   if ((await fetchIsMusic(ID)) == null) {
@@ -59,7 +60,7 @@ function convertDuration(duration: string): number {
 async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   const artistID = await insertArtist(yt_video_details.items[0].snippet.channelId, yt_video_details.items[0].snippet.channelTitle);
   if (!artistID) {
-    console.error(`Failed to insert artist: ${yt_video_details.items[0].snippet.channelId}`);
+    logger.error(`Failed to insert artist: ${yt_video_details.items[0].snippet.channelId}`);
     return;
   }
   const categoriesID = await insertCategories(yt_video_details.items[0].topicDetails.topicCategories);
@@ -71,7 +72,7 @@ async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
     yt_video_details.items[0].snippet.defaultAudioLanguage || "en"
   );
   if (!videoID) {
-    console.error(`Failed to insert video: ${yt_video_details.items[0].id}`);
+    logger.error(`Failed to insert video: ${yt_video_details.items[0].id}`);
     return;
   }
   await insertCategoriesToVideo(videoID.id, categoriesID.map((i) => i.id));
@@ -106,7 +107,7 @@ async function getYoutubeVideoDetails(videoId: string): Promise<YouTubeApiRespon
     const data = await response.json() as YouTubeApiResponse;
     return data;
   } catch (error) {
-    console.error('Error fetching YouTube video details:', error);
+    logger.error('Error fetching YouTube video details:', error);
     return null;
   }
 }

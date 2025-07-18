@@ -3,6 +3,7 @@ import { IRequest, IRequestMusic, MessageType } from "../interface/interface";
 import { listenedToMusic } from "../services/music.service";
 import { parse } from "url";
 import { IncomingMessage, Server } from "http";
+import { logger } from "../utils/logger";
 
 export interface AuthenticatedRequest extends IncomingMessage {
   isAuthenticated?: boolean;
@@ -11,7 +12,7 @@ export interface AuthenticatedRequest extends IncomingMessage {
 export function setupWebSocketServer() {
   const wss = new WebSocketServer({ noServer: true });
   wss.on("connection", function (ws: any, req: AuthenticatedRequest) {
-    console.log(`New connection`);
+    logger.info(`New connection`);
     ws.on("message", async function (message: string) {
       // Unauthenticated clients can't send messages
       if (req.isAuthenticated === false) {
@@ -24,7 +25,7 @@ export function setupWebSocketServer() {
         return;
       }
       const json = JSON.parse(message) as IRequest;
-      console.log(json);
+      logger.info(json);
 
       switch (json.type) {
         case MessageType.PING:
@@ -38,10 +39,10 @@ export function setupWebSocketServer() {
       }
     });
     ws.on("error", function (error: Error) {
-      console.error(error);
+      logger.error(error);
     });
     ws.on("close", function () {
-      console.log("Connection closed");
+      logger.info("Connection closed");
     });
   });
   return wss;
