@@ -7,6 +7,7 @@ import { filterMusicRequestHandler, getMusicRequestHandler } from "../controller
 import { getGenresRequestHandler } from "../controllers/genre.controller";
 import { processErrorMiddleware } from "../middleware/error.middleware";
 import { logRequestMiddleware } from "../middleware/logger.middleware";
+import { authRequestHandler } from "../controllers/auth.controller";
 
 export function setupAPIRoutes() {
     const app = express();
@@ -24,6 +25,7 @@ export function setupAPIRoutes() {
     app.get("/artist", getArtistRequestHandler);
     app.get("/music", getMusicRequestHandler);
     app.get("/genre", getGenresRequestHandler);
+    app.get("/auth", authRequestHandler)
     app.post("/filter", filterMusicRequestHandler);
 
     app.use(processErrorMiddleware);

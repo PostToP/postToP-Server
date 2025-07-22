@@ -62,9 +62,10 @@ export interface PosttopNerResult {
   video_id: Int8;
 }
 
-export interface PosttopUsers {
+export interface PosttopUser {
   id: Generated<number>;
-  name: string;
+  password_hash: string;
+  username: string;
 }
 
 export interface PosttopVideo {
@@ -95,7 +96,7 @@ export interface DB {
   "posttop.listened": PosttopListened;
   "posttop.main_category": PosttopMainCategory;
   "posttop.ner_result": PosttopNerResult;
-  "posttop.users": PosttopUsers;
+  "posttop.user": PosttopUser;
   "posttop.video": PosttopVideo;
   "posttop.video_category": PosttopVideoCategory;
   "posttop.video_metadata": PosttopVideoMetadata;
