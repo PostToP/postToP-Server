@@ -8,6 +8,8 @@ import { getGenresRequestHandler } from "../controllers/genre.controller";
 import { processErrorMiddleware } from "../middleware/error.middleware";
 import { logRequestMiddleware } from "../middleware/logger.middleware";
 import { authRequestHandler } from "../controllers/auth.controller";
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from "../../utils/swagger";
 import "express-async-errors";
 
 export function setupAPIRoutes() {
@@ -21,6 +23,7 @@ export function setupAPIRoutes() {
     app.use(json());
     app.use(cors());
     app.use(logRequestMiddleware);
+    app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
     app.get("/debug", getDebugRequestHandler)
     app.get("/artist", getArtistRequestHandler);
