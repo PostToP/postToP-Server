@@ -8,6 +8,7 @@ import { getGenresRequestHandler } from "../controllers/genre.controller";
 import { processErrorMiddleware } from "../middleware/error.middleware";
 import { logRequestMiddleware } from "../middleware/logger.middleware";
 import { authRequestHandler } from "../controllers/auth.controller";
+import "express-async-errors";
 
 export function setupAPIRoutes() {
     const app = express();
