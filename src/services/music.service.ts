@@ -7,7 +7,7 @@ import { IRequestMusic } from "../interface/interface";
 import { YouTubeApiResponse } from "../interface/youtube";
 import { logger } from "../utils/logger";
 
-export async function listenedToMusic(music: IRequestMusic) {
+export async function listenedToMusic(music: IRequestMusic, userID: number) {
   const { watchID } = music;
   const exists = await fetchVideo(watchID);
   let ID = exists?.id;
@@ -18,7 +18,6 @@ export async function listenedToMusic(music: IRequestMusic) {
       return;
     }
     ID = await addNewVideoToDatabase(yt_video_details);
-
   }
   if (!ID) {
     logger.error(`Failed to insert or fetch video ID for ${watchID}`);
@@ -28,7 +27,7 @@ export async function listenedToMusic(music: IRequestMusic) {
     return;
   }
 
-  await insertMusicWatched(ID);
+  await insertMusicWatched(ID, userID);
   return;
 }
 

@@ -1,10 +1,10 @@
 import { DatabaseManager } from "..";
 
-export async function insertMusicWatched(musicID: string) {
+export async function insertMusicWatched(musicID: string, userID: number) {
     const db = DatabaseManager.getInstance();
     return db
         .insertInto('posttop.listened')
-        .values({ video_id: musicID, user_id: 1, listened_at: new Date().toISOString() })
+        .values({ video_id: musicID, user_id: userID, listened_at: new Date().toISOString() })
         .onConflict((oc) => oc.doNothing())
         .execute();
 }
