@@ -31,4 +31,5 @@ export interface ExtendedWebSocketConnection extends WebSocket {
     userId: number | undefined;
     phase: WebSocketPhase;
     authenticated: boolean;
+    disconnectTimeout?: NodeJS.Timeout;
 }

@@ -6,12 +6,14 @@ export function authWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: any,
 ) {
+    clearTimeout(ws.disconnectTimeout);
     let verifiedToken = verifyToken(data.token);
     if (!verifiedToken.ok) {
         ws.send(JSON.stringify({
             op: OperationType.ERROR,
             d: { message: "Authentication failed" },
         }));
+        ws.close();
         logger.error(`Authentication failed for user ${ws.userId}`);
         return;
     }

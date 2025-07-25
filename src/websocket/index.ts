@@ -24,6 +24,14 @@ function websocketConnectionHandler(
       message: "Waiting for declaration of intent, authenticate or eavesdrop",
     },
   }));
+  ws.disconnectTimeout = setTimeout(() => {
+    ws.send(JSON.stringify({
+      op: OperationType.ERROR,
+      d: { message: "Connection timed out, please try again" },
+    }));
+    ws.close();
+    logger.warn(`Connection timed out for userId: ${ws.userId}`);
+  }, 10000);
   ws.phase = WebSocketPhase.DECLARE_INTENT;
   ws.authenticated = false;
   ws.userId = undefined;
