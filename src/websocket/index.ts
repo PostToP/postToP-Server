@@ -5,8 +5,11 @@ import { ExtendedWebSocketConnection, OperationType, WebSocketPhase, WebSocketRe
 import { authWebsocketHandler } from "./controllers/auth.controller";
 import { eavesdropWebsocketHandler, listenedToMusicWebsocketHandler } from "./controllers/music.controller";
 
+export let wssServer: WebSocketServer;
+
 export function setupWebSocketServer() {
   const wss = new WebSocketServer({ noServer: true });
+  wssServer = wss;
   wss.on("connection", websocketConnectionHandler);
   return wss;
 }
