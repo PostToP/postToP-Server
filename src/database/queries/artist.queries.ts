@@ -41,5 +41,5 @@ export async function insertArtist(artistID: string, name: string) {
         .values({ yt_id: artistID, name })
         .onConflict((oc) => oc.doNothing())
         .returning('id')
-        .executeTakeFirst()
+        .executeTakeFirst();
 }

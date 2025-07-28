@@ -1,6 +1,4 @@
-import exp from "constants";
 import { DatabaseManager } from "..";
-import { insertArtist } from "./artist.queries";
 
 export async function fetchVideo(videoID: string) {
     const db = DatabaseManager.getInstance();

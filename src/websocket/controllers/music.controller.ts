@@ -16,7 +16,7 @@ export function listenedToMusicWebsocketHandler(
         return;
     }
 
-    listenedToMusic(data, ws.userId)
+    listenedToMusic(data.watchID, ws.userId)
     announceSongToEvedroppers(ws.userId, data);
     ws.send(JSON.stringify({
         op: OperationType.MUSIC_LISTENED,
