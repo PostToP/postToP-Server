@@ -1,4 +1,3 @@
-import { DatabaseManager } from "../database";
 import { insertArtist } from "../database/queries/artist.queries";
 import { insertFilter } from "../database/queries/filter.queries";
 import { insertCategories, insertCategoriesToVideo } from "../database/queries/genre.queries";
@@ -41,6 +40,7 @@ export async function filterMusic(watchID: string) {
   await insertFilter(watchID);
 }
 
+// TODO: do this in a transaction
 async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   const data = convertYoutubeVideoDetails(yt_video_details);
   const insertedArtist = await insertArtist(data.channelId, data.channelTitle);

@@ -45,7 +45,7 @@ export function convertYoutubeVideoDetails(details: YouTubeApiResponse) {
 function convertDuration(duration: string): number {
     const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
     if (!match) {
-        return 0;
+        return 0; // probably live stream TODO
     }
     const hours = match[1] ? parseInt(match[1], 10) : 0;
     const minutes = match[2] ? parseInt(match[2], 10) :

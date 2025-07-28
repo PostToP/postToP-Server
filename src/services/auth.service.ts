@@ -2,7 +2,6 @@ import { fetchUserHash } from "../database/queries/auth.queries";
 import bcrypt from "bcrypt";
 import { fetchUserFromUsername } from "../database/queries/user.queries";
 import jwt from "jsonwebtoken";
-import { ok } from "assert";
 const jwtToken = process.env.JWT_TOKEN ?? "";
 
 export async function authenticateUser(username: string, password: string) {
