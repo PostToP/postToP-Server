@@ -39,12 +39,16 @@ async function startServer(port: number) {
 
   process.on("unhandledRejection", (reason, promise) => {
     logger.error("Unhandled Rejection at:", promise, "reason:", reason);
-    exitHandler("unhandledRejection");
+    if (process.env.NODE_ENV !== "production") {
+      exitHandler("unhandledRejection");
+    }
   });
 
   process.on("uncaughtException", (error) => {
     logger.error("Uncaught Exception:", error);
-    exitHandler("uncaughtException");
+    if (process.env.NODE_ENV !== "production") {
+      exitHandler("uncaughtException");
+    }
   });
 
 }
