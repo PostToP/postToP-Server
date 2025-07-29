@@ -1,4 +1,4 @@
-import { ExtendedWebSocketConnection, OperationType, WebSocketPhase } from "../../interface/websocket";
+import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
 import { verifyToken } from "../../services/auth.service";
 import { logger } from "../../utils/logger";
 
@@ -10,7 +10,7 @@ export function authWebsocketHandler(
     let verifiedToken = verifyToken(data.token);
     if (!verifiedToken.ok) {
         ws.send(JSON.stringify({
-            op: OperationType.ERROR,
+            op: ResponseOperationType.ERROR,
             d: { message: "Authentication failed" },
         }));
         ws.close();
@@ -21,7 +21,7 @@ export function authWebsocketHandler(
     ws.userId = verifiedToken.data?.userId;
     ws.authenticated = true;
     ws.send(JSON.stringify({
-        op: OperationType.AUTH,
+        op: ResponseOperationType.AUTHENTICATED,
         d: { message: "Authenticated successfully" },
     }));
     logger.info(`User ${ws.userId} authenticated successfully`);

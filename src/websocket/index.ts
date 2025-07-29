@@ -1,7 +1,7 @@
 import { WebSocketServer, WebSocket, RawData } from "ws";
 import { IncomingMessage, Server } from "http";
 import { logger } from "../utils/logger";
-import { ExtendedWebSocketConnection, OperationType, WebSocketPhase, WebSocketRequest } from "../interface/websocket";
+import { ExtendedWebSocketConnection, RequestOperationType, ResponseOperationType, WebSocketPhase, WebSocketRequest } from "../interface/websocket";
 import { authWebsocketHandler } from "./controllers/auth.controller";
 import { eavesdropWebsocketHandler, listenedToMusicWebsocketHandler } from "./controllers/music.controller";
 
@@ -19,14 +19,14 @@ function websocketConnectionHandler(
   _req: IncomingMessage
 ) {
   ws.send(JSON.stringify({
-    op: OperationType.DECLARE_INTENT,
+    op: ResponseOperationType.DECLARE_INTENT,
     d: {
       message: "Waiting for declaration of intent, authenticate or eavesdrop",
     },
   }));
   ws.disconnectTimeout = setTimeout(() => {
     ws.send(JSON.stringify({
-      op: OperationType.ERROR,
+      op: ResponseOperationType.ERROR,
       d: { message: "Connection timed out, please try again" },
     }));
     ws.close();
@@ -51,18 +51,18 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
 
   const operations: any = {
     [WebSocketPhase.DECLARE_INTENT]: {
-      [OperationType.AUTH]: authWebsocketHandler,
-      [OperationType.EAVESDROP]: eavesdropWebsocketHandler,
+      [RequestOperationType.AUTH]: authWebsocketHandler,
+      [RequestOperationType.EAVESDROP]: eavesdropWebsocketHandler,
     },
     [WebSocketPhase.CONNECTED]: {
-      [OperationType.MUSIC_LISTENED]: listenedToMusicWebsocketHandler,
+      [RequestOperationType.MUSIC_ENDED]: listenedToMusicWebsocketHandler,
     }
   };
 
   if (!(operations[phase] && operations[phase][operation])) {
     logger.warn(`Unknown operation ${operation} in phase ${phase} for userId ${ws.userId}`);
     ws.send(JSON.stringify({
-      op: OperationType.ERROR,
+      op: ResponseOperationType.ERROR,
       d: { message: "Unknown operation" },
     }));
     return;
@@ -72,7 +72,7 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
   } catch (error) {
     logger.error(`Error processing operation ${operation} for userId ${ws.userId}:`, error);
     ws.send(JSON.stringify({
-      op: OperationType.ERROR,
+      op: ResponseOperationType.ERROR,
       d: { message: "An error occurred while processing your request" },
     }));
   }

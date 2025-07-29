@@ -1,13 +1,24 @@
 import { WebSocket } from "ws";
 
-export enum OperationType {
-    DECLARE_INTENT = 0,
+export enum RequestOperationType {
     AUTH = 1,
     EAVESDROP = 2,
-    PING = 3,
-    PONG = 4,
-    MUSIC_LISTENED = 5,
-    ERROR = 400
+    HEARTBEAT = 3,
+    MUSIC_STARTED = 4,
+    MUSIC_UPDATE = 5,
+    MUSIC_ENDED = 6,
+}
+
+export enum ResponseOperationType {
+    DECLARE_INTENT = 100,
+    AUTHENTICATED = 101,
+    EAVESDROPPED = 102,
+    PONG = 103,
+    MUSIC_STARTED = 104,
+    MUSIC_UPDATE = 105,
+    MUSIC_ENDED = 106,
+    REQUEST_STATUS = 107,
+    ERROR = 400,
 }
 
 export enum WebSocketPhase {
@@ -16,14 +27,13 @@ export enum WebSocketPhase {
 }
 
 export interface WebSocketRequest {
-    op: OperationType;
-    d: any;
+    op: RequestOperationType;
+    d: WebsocketData;
 }
 
 export interface WebSocketResponse {
-    op: OperationType;
-    d: object;
-    phase: WebSocketPhase;
+    op: ResponseOperationType;
+    d: WebsocketData;
 }
 
 
@@ -33,3 +43,10 @@ export interface ExtendedWebSocketConnection extends WebSocket {
     authenticated: boolean;
     disconnectTimeout?: NodeJS.Timeout;
 }
+
+interface WebsocketData extends Object { }
+
+export interface VideoRequestData extends WebsocketData {
+    watchID: string;
+}
+

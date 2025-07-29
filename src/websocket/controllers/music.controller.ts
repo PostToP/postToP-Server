@@ -1,5 +1,5 @@
 import { wssServer } from "..";
-import { ExtendedWebSocketConnection, OperationType, WebSocketPhase } from "../../interface/websocket";
+import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
 import { listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
 
@@ -9,7 +9,7 @@ export function listenedToMusicWebsocketHandler(
 ) {
     if (!ws.authenticated || ws.userId === undefined) {
         ws.send(JSON.stringify({
-            op: OperationType.ERROR,
+            op: ResponseOperationType.ERROR,
             d: { message: "User not authenticated" },
         }));
         logger.error(`User ${ws.userId} attempted to listen to music without authentication`);
@@ -19,7 +19,7 @@ export function listenedToMusicWebsocketHandler(
     listenedToMusic(data.watchID, ws.userId)
     announceSongToEvedroppers(ws.userId, data);
     ws.send(JSON.stringify({
-        op: OperationType.MUSIC_LISTENED,
+        op: ResponseOperationType.MUSIC_ENDED,
         d: { message: "Music listened successfully" },
     }));
     logger.info(`User ${ws.userId} listened to music successfully`);
@@ -33,7 +33,7 @@ function announceSongToEvedroppers(userID: number, music: any) {
         // @ts-ignore
         if (client.readyState === WebSocket.OPEN && client.phase === WebSocketPhase.CONNECTED && client.userId === userID) {
             client.send(JSON.stringify({
-                op: OperationType.MUSIC_LISTENED,
+                op: ResponseOperationType.MUSIC_ENDED,
                 d: {
                     userId: userID,
                     music: music,
@@ -52,7 +52,7 @@ export function eavesdropWebsocketHandler(
     // TODO: use more obscure user ID
     ws.userId = data.userId;
     ws.send(JSON.stringify({
-        op: OperationType.EAVESDROP,
+        op: ResponseOperationType.EAVESDROPPED,
         d: { message: "Eavesdropping started" },
     }));
     //TODO: get currently playing music from eavesdroppee, needs redis server or jank dictionary
