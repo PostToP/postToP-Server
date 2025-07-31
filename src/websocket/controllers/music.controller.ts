@@ -1,33 +1,10 @@
 import { wssServer } from "..";
 import { fetchIsMusic, fetchVideoDataAll } from "../../database/queries/video.queries";
-import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, WebSocketPhase } from "../../interface/websocket";
+import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus, WebSocketPhase } from "../../interface/websocket";
 import { getOrFetchVideo, listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
 
-export function listenedToMusicWebsocketHandler(
-    ws: ExtendedWebSocketConnection,
-    data: any,
-) {
-    if (!ws.authenticated || ws.userId === undefined) {
-        ws.send(JSON.stringify({
-            op: ResponseOperationType.ERROR,
-            d: { message: "User not authenticated" },
-        }));
-        logger.error(`User ${ws.userId} attempted to listen to music without authentication`);
-        return;
-    }
-
-    listenedToMusic(data.watchID, ws.userId)
-    announceSongToEvedroppers(ws.userId, data);
-    ws.send(JSON.stringify({
-        op: ResponseOperationType.MUSIC_ENDED,
-        d: { message: "Music listened successfully" },
-    }));
-    logger.info(`User ${ws.userId} listened to music successfully`);
-}
-
-
-export async function startedListeningToMusicWebsocketHandler(
+export function videoUpdateWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: VideoRequestData,
 ) {
@@ -36,10 +13,51 @@ export async function startedListeningToMusicWebsocketHandler(
             op: ResponseOperationType.ERROR,
             d: { message: "User not authenticated" },
         }));
-        logger.error(`User ${ws.userId} attempted to start listening to music without authentication`);
+        logger.error(`User ${ws.userId} attempted to update video without authentication`);
         return;
     }
 
+    const videoStatus = data.status;
+    switch (videoStatus) {
+        case VideoStatus.STARTED:
+            startedListeningToMusicWebsocketHandler(ws, data);
+            break;
+        case VideoStatus.PLAYING:
+        case VideoStatus.PAUSED:
+            announceSongToEvedroppers(ws.userId!, data);
+            break;
+        case VideoStatus.ENDED:
+            listenedToMusicWebsocketHandler(ws, data);
+            break;
+        default:
+            ws.send(JSON.stringify({
+                op: ResponseOperationType.ERROR,
+                d: { message: "Invalid video status" },
+            }));
+            logger.error(`User ${ws.userId} sent invalid video status: ${videoStatus}`);
+            break;
+    }
+}
+
+
+function listenedToMusicWebsocketHandler(
+    ws: ExtendedWebSocketConnection,
+    data: any,
+) {
+    listenedToMusic(data.watchID, ws.userId!)
+    announceSongToEvedroppers(ws.userId!, data);
+    ws.send(JSON.stringify({
+        op: ResponseOperationType.VIDEO_UPDATE,
+        d: { message: "Music listened successfully" },
+    }));
+    logger.info(`User ${ws.userId} listened to music successfully`);
+}
+
+
+async function startedListeningToMusicWebsocketHandler(
+    ws: ExtendedWebSocketConnection,
+    data: VideoRequestData,
+) {
     const videoID = await getOrFetchVideo(data.watchID);
     const isMusic = await fetchIsMusic(videoID);
     const videoData = await fetchVideoDataAll(videoID);
@@ -61,7 +79,7 @@ export async function startedListeningToMusicWebsocketHandler(
     };
 
     ws.send(JSON.stringify({
-        op: ResponseOperationType.MUSIC_STARTED,
+        op: ResponseOperationType.VIDEO_UPDATE,
         d: {
             video: responseVideo,
         },
@@ -77,7 +95,7 @@ export async function startedListeningToMusicWebsocketHandler(
     if (!isMusic)
         return;
 
-    announceSongToEvedroppers(ws.userId, {
+    announceSongToEvedroppers(ws.userId!, {
         video: responseVideo,
         listeningData: listeningData,
     });
@@ -91,7 +109,7 @@ function announceSongToEvedroppers(userID: number, music: any) {
         // @ts-ignore
         if (client.readyState === WebSocket.OPEN && client.phase === WebSocketPhase.CONNECTED && client.userId === userID) {
             client.send(JSON.stringify({
-                op: ResponseOperationType.MUSIC_ENDED,
+                op: ResponseOperationType.VIDEO_UPDATE,
                 d: {
                     userId: userID,
                     ...music,
