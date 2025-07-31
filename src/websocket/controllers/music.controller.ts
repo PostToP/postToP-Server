@@ -60,12 +60,6 @@ export async function startedListeningToMusicWebsocketHandler(
         isMusic: isMusic !== null,
     };
 
-    const listeningData: ListeingData = {
-        currentTime: data.currentTime,
-        status: data.status,
-        updatedAt: new Date(),
-    };
-
     ws.send(JSON.stringify({
         op: ResponseOperationType.MUSIC_STARTED,
         d: {
@@ -73,6 +67,20 @@ export async function startedListeningToMusicWebsocketHandler(
         },
     }));
     logger.info(`User ${ws.userId} started listening to music successfully`);
+
+    const listeningData: ListeingData = {
+        currentTime: data.currentTime,
+        status: data.status,
+        updatedAt: new Date(),
+    };
+
+    if (!isMusic)
+        return;
+
+    announceSongToEvedroppers(ws.userId, {
+        video: responseVideo,
+        listeningData: listeningData,
+    });
 }
 
 
@@ -86,7 +94,7 @@ function announceSongToEvedroppers(userID: number, music: any) {
                 op: ResponseOperationType.MUSIC_ENDED,
                 d: {
                     userId: userID,
-                    music: music,
+                    ...music,
                 },
             }));
         }
@@ -98,6 +106,7 @@ export function eavesdropWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: any,
 ) {
+    clearTimeout(ws.disconnectTimeout);
     ws.phase = WebSocketPhase.CONNECTED;
     // TODO: use more obscure user ID
     ws.userId = data.userId;
