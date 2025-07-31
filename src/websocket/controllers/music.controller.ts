@@ -1,6 +1,7 @@
 import { wssServer } from "..";
-import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
-import { listenedToMusic } from "../../services/music.service";
+import { fetchIsMusic, fetchVideoDataAll } from "../../database/queries/video.queries";
+import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, WebSocketPhase } from "../../interface/websocket";
+import { getOrFetchVideo, listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
 
 export function listenedToMusicWebsocketHandler(
@@ -23,6 +24,55 @@ export function listenedToMusicWebsocketHandler(
         d: { message: "Music listened successfully" },
     }));
     logger.info(`User ${ws.userId} listened to music successfully`);
+}
+
+
+export async function startedListeningToMusicWebsocketHandler(
+    ws: ExtendedWebSocketConnection,
+    data: VideoRequestData,
+) {
+    if (!ws.authenticated || ws.userId === undefined) {
+        ws.send(JSON.stringify({
+            op: ResponseOperationType.ERROR,
+            d: { message: "User not authenticated" },
+        }));
+        logger.error(`User ${ws.userId} attempted to start listening to music without authentication`);
+        return;
+    }
+
+    const videoID = await getOrFetchVideo(data.watchID);
+    const isMusic = await fetchIsMusic(videoID);
+    const videoData = await fetchVideoDataAll(videoID);
+
+    if (!videoData) {
+        return;
+    }
+
+    const responseVideo: VideoResponseData = {
+        watchID: data.watchID,
+        title: videoData.title,
+        artist: {
+            name: videoData.name,
+            handle: videoData.yt_id,
+        },
+        duration: videoData.duration,
+        coverImage: "https://i.ytimg.com/vi/" + data.watchID + "/hqdefault.jpg",
+        isMusic: isMusic !== null,
+    };
+
+    const listeningData: ListeingData = {
+        currentTime: data.currentTime,
+        status: data.status,
+        updatedAt: new Date(),
+    };
+
+    ws.send(JSON.stringify({
+        op: ResponseOperationType.MUSIC_STARTED,
+        d: {
+            video: responseVideo,
+        },
+    }));
+    logger.info(`User ${ws.userId} started listening to music successfully`);
 }
 
 

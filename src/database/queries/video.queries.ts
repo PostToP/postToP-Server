@@ -65,3 +65,18 @@ export async function fetchIsMusic(videoID: string) {
         .selectAll()
         .executeTakeFirst();
 }
+
+
+export async function fetchVideoDataAll(videoID: string) {
+    const db = DatabaseManager.getInstance();
+    return db
+        .selectFrom('posttop.video')
+        .innerJoin('posttop.video_metadata',
+            (join) => join
+                .onRef('posttop.video.id', '=', 'posttop.video_metadata.video_id')
+                .onRef('posttop.video.default_language', '=', 'posttop.video_metadata.language'))
+        .innerJoin('posttop.channel as channel', 'posttop.video.channel_id', 'channel.id')
+        .selectAll()
+        .where('posttop.video.id', '=', videoID)
+        .executeTakeFirst();
+}

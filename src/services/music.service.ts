@@ -18,7 +18,7 @@ export async function listenedToMusic(watchID: string, userID: number) {
 }
 
 
-async function getOrFetchVideo(watchID: string) {
+export async function getOrFetchVideo(watchID: string) {
   const exists = await fetchVideo(watchID);
   if (exists) {
     return exists.id;

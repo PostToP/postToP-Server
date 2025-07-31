@@ -48,5 +48,31 @@ interface WebsocketData extends Object { }
 
 export interface VideoRequestData extends WebsocketData {
     watchID: string;
+    currentTime: number;
+    status: VideoStatus;
 }
 
+export interface VideoResponseData extends WebsocketData {
+    watchID: string;
+    title: string;
+    artist: {
+        name: string;
+        handle: string;
+    },
+    duration: number;
+    coverImage: string;
+    isMusic: boolean;
+}
+
+export interface ListeingData extends WebsocketData {
+    currentTime: number;
+    status: VideoStatus;
+    updatedAt: Date;
+}
+
+
+export enum VideoStatus {
+    PLAYING,
+    PAUSED,
+    ENDED,
+}

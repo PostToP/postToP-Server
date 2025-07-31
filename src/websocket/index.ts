@@ -3,7 +3,7 @@ import { IncomingMessage, Server } from "http";
 import { logger } from "../utils/logger";
 import { ExtendedWebSocketConnection, RequestOperationType, ResponseOperationType, WebSocketPhase, WebSocketRequest } from "../interface/websocket";
 import { authWebsocketHandler } from "./controllers/auth.controller";
-import { eavesdropWebsocketHandler, listenedToMusicWebsocketHandler } from "./controllers/music.controller";
+import { eavesdropWebsocketHandler, listenedToMusicWebsocketHandler, startedListeningToMusicWebsocketHandler } from "./controllers/music.controller";
 
 export let wssServer: WebSocketServer;
 
@@ -55,6 +55,7 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
       [RequestOperationType.EAVESDROP]: eavesdropWebsocketHandler,
     },
     [WebSocketPhase.CONNECTED]: {
+      [RequestOperationType.MUSIC_STARTED]: startedListeningToMusicWebsocketHandler,
       [RequestOperationType.MUSIC_ENDED]: listenedToMusicWebsocketHandler,
     }
   };
