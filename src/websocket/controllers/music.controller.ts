@@ -1,8 +1,8 @@
-import { wssServer } from "..";
 import { fetchIsMusic, fetchVideoDataAll } from "../../database/queries/video.queries";
-import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus, WebSocketPhase } from "../../interface/websocket";
+import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus } from "../../interface/websocket";
 import { getOrFetchVideo, listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
+import { announceSongToEvedroppers } from "./misc.controller";
 
 export function videoUpdateWebsocketHandler(
     ws: ExtendedWebSocketConnection,
@@ -99,39 +99,4 @@ async function startedListeningToMusicWebsocketHandler(
         video: responseVideo,
         listeningData: listeningData,
     });
-}
-
-
-// TODO: Replace this with some kind of event system or pub/sub pattern
-// but this is fine for now
-function announceSongToEvedroppers(userID: number, music: any) {
-    wssServer.clients.forEach((client) => {
-        // @ts-ignore
-        if (client.readyState === WebSocket.OPEN && client.phase === WebSocketPhase.CONNECTED && client.userId === userID) {
-            client.send(JSON.stringify({
-                op: ResponseOperationType.VIDEO_UPDATE,
-                d: {
-                    userId: userID,
-                    ...music,
-                },
-            }));
-        }
-    });
-    logger.info(`Announced music listened by user ${userID} to eavesdroppers`);
-}
-
-export function eavesdropWebsocketHandler(
-    ws: ExtendedWebSocketConnection,
-    data: any,
-) {
-    clearTimeout(ws.disconnectTimeout);
-    ws.phase = WebSocketPhase.CONNECTED;
-    // TODO: use more obscure user ID
-    ws.userId = data.userId;
-    ws.send(JSON.stringify({
-        op: ResponseOperationType.EAVESDROPPED,
-        d: { message: "Eavesdropping started" },
-    }));
-    //TODO: get currently playing music from eavesdroppee, needs redis server or jank dictionary
-    logger.info(`User ${ws.userId} started eavesdropping`);
 }

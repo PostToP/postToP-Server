@@ -63,6 +63,7 @@ export interface PosttopNerResult {
 }
 
 export interface PosttopUser {
+  handle: Generated<string>;
   id: Generated<number>;
   password_hash: string;
   username: string;

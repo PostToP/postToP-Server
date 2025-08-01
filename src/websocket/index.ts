@@ -3,8 +3,8 @@ import { IncomingMessage, Server } from "http";
 import { logger } from "../utils/logger";
 import { ExtendedWebSocketConnection, RequestOperationType, ResponseOperationType, WebSocketPhase, WebSocketRequest } from "../interface/websocket";
 import { authWebsocketHandler } from "./controllers/auth.controller";
-import { eavesdropWebsocketHandler, videoUpdateWebsocketHandler } from "./controllers/music.controller";
-import { heartbeatWebsocketHandler } from "./controllers/misc.controller";
+import { videoUpdateWebsocketHandler } from "./controllers/music.controller";
+import { eavesdropWebsocketHandler, heartbeatWebsocketHandler } from "./controllers/misc.controller";
 
 export let wssServer: WebSocketServer;
 
