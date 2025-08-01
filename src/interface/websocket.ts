@@ -11,7 +11,7 @@ export enum ResponseOperationType {
     DECLARE_INTENT = 100,
     AUTHENTICATED = 101,
     EAVESDROPPED = 102,
-    PONG = 103,
+    HEARTBEAT = 103,
     VIDEO_UPDATE = 105,
     REQUEST_STATUS = 107,
     ERROR = 400,

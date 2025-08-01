@@ -4,6 +4,7 @@ import { logger } from "../utils/logger";
 import { ExtendedWebSocketConnection, RequestOperationType, ResponseOperationType, WebSocketPhase, WebSocketRequest } from "../interface/websocket";
 import { authWebsocketHandler } from "./controllers/auth.controller";
 import { eavesdropWebsocketHandler, videoUpdateWebsocketHandler } from "./controllers/music.controller";
+import { heartbeatWebsocketHandler } from "./controllers/misc.controller";
 
 export let wssServer: WebSocketServer;
 
@@ -44,7 +45,6 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
   logger.info(`Received message from userId ${ws.userId}: ${message}`);
   const json = JSON.parse(message.toString()) as WebSocketRequest;
 
-  logger.info(json);
   const phase = ws.phase;
   const operation = json.op;
   const data = json.d;
@@ -56,6 +56,7 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
     },
     [WebSocketPhase.CONNECTED]: {
       [RequestOperationType.VIDEO_UPDATE]: videoUpdateWebsocketHandler,
+      [RequestOperationType.HEARTBEAT]: heartbeatWebsocketHandler,
     }
   };
 
