@@ -1,5 +1,5 @@
-import { fetchTopArtists } from "../database/queries/artist.queries";
+import { ArtistQueries } from "../database/queries/artist.queries";
 
 export async function getTopArtists(from: Date, to: Date, limit: number = 10) {
-  return fetchTopArtists(limit, from, to);
+  return ArtistQueries.fetchTop(limit, from, to);
 }

@@ -1,5 +1,5 @@
 import { wssServer } from "..";
-import { fetchUserFromHandle } from "../../database/queries/user.queries";
+import { UserQueries } from "../../database/queries/user.queries";
 import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
 import { logger } from "../../utils/logger";
 
@@ -40,7 +40,7 @@ export async function eavesdropWebsocketHandler(
     data: any,
 ) {
     clearTimeout(ws.disconnectTimeout);
-    const user = await fetchUserFromHandle(data.handle);
+    const user = await UserQueries.fetchByHandle(data.handle);
 
     if (!user) {
         ws.send(JSON.stringify({

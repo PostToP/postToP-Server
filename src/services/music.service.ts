@@ -1,25 +1,24 @@
-import { insertArtist } from "../database/queries/artist.queries";
-import { insertFilter } from "../database/queries/filter.queries";
-import { insertCategories, insertCategoriesToVideo } from "../database/queries/genre.queries";
-import { fetchLatestMusic, fetchTopMusic, insertMusicWatched } from "../database/queries/music.queries";
-import { insertVideo, fetchVideo, insertSingleMetadata, fetchIsMusic } from "../database/queries/video.queries";
+import { ArtistQueries } from "../database/queries/artist.queries";
+import { CategoryQueries } from "../database/queries/genre.queries";
+import { MusicQueries } from "../database/queries/music.queries";
+import { VideoQueries } from "../database/queries/video.queries";
 import { YouTubeApiResponse } from "../interface/youtube";
 import { convertYoutubeVideoDetails, getYoutubeVideoDetails } from "./youtube.service";
 
 export async function listenedToMusic(watchID: string, userID: number) {
   const videoID = await getOrFetchVideo(watchID);
 
-  if ((await fetchIsMusic(videoID)) == null) {
+  if ((await VideoQueries.fetchIsMusic(videoID)) == null) {
     return false;
   }
 
-  await insertMusicWatched(videoID, userID);
+  await MusicQueries.insertWatched(videoID, userID);
   return true;
 }
 
 
 export async function getOrFetchVideo(watchID: string) {
-  const exists = await fetchVideo(watchID);
+  const exists = await VideoQueries.fetch(watchID);
   if (exists) {
     return exists.id;
   }
@@ -29,35 +28,31 @@ export async function getOrFetchVideo(watchID: string) {
 }
 
 export async function getLatestMusic(limit: number = 10) {
-  return fetchLatestMusic(limit);
+  return MusicQueries.fetchLatest(limit);
 }
 
 export async function getTopMusic(from: Date, to: Date, limit: number = 10) {
-  return fetchTopMusic(limit, from, to);
-}
-
-export async function filterMusic(watchID: string) {
-  await insertFilter(watchID);
+  return MusicQueries.fetchTop(limit, from, to);
 }
 
 // TODO: do this in a transaction
 async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   const data = convertYoutubeVideoDetails(yt_video_details);
-  const insertedArtist = await insertArtist(data.channelId, data.channelTitle);
-  const categoriesID = await insertCategories(data.topicCategories);
+  const insertedArtist = await ArtistQueries.insert(data.channelId, data.channelTitle);
+  const categoriesID = await CategoryQueries.insert(data.topicCategories);
   const defaultLanguage = data.defaultLanguage || data.defaultAudioLanguage || "undefined";
-  const videoID = await insertVideo(
+  const videoID = await VideoQueries.insert(
     data.id,
     insertedArtist!.id,
     data.duration,
     data.categoryId,
     defaultLanguage
   );
-  await insertCategoriesToVideo(videoID!.id, categoriesID.map((i) => i.id));
-  await insertSingleMetadata(videoID!.id, defaultLanguage, data.title, data.description);
+  await CategoryQueries.insertToVideo(videoID!.id, categoriesID.map((i) => i.id));
+  await VideoQueries.insertMetadata(videoID!.id, defaultLanguage, data.title, data.description);
   for (const [lang, localization] of Object.entries(data.localizations)) {
     if (lang === defaultLanguage) continue;
-    await insertSingleMetadata(videoID!.id, lang, localization.title, localization.description);
+    await VideoQueries.insertMetadata(videoID!.id, lang, localization.title, localization.description);
   }
   return videoID!.id;
 }

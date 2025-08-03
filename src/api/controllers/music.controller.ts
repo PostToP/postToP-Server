@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Validate } from "../../utils/validator";
-import { filterMusic, getLatestMusic, getTopMusic } from "../../services/music.service";
+import { getLatestMusic, getTopMusic } from "../../services/music.service";
 
 
 export async function getMusicRequestHandler(req: Request, res: Response) {
@@ -33,16 +33,4 @@ export async function getMusicRequestHandler(req: Request, res: Response) {
             .status(200)
             .json(await getTopMusic(new Date(from), new Date(to), limit));
     if (sortBy === "latest") return res.status(200).json(await getLatestMusic(limit));
-}
-
-export async function filterMusicRequestHandler(req: Request, res: Response) {
-    const body = req.body as { watchID: string };
-
-    Validate(body?.watchID)
-        .required("watchID is required")
-        .string("watchID must be a string")
-        .regex(/^[a-zA-Z0-9_-]{11}$/, "watchID is invalid");
-
-    await filterMusic(body.watchID);
-    return res.status(200).json({ message: "Filtered" });
 }

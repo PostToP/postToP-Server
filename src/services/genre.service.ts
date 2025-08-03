@@ -1,5 +1,5 @@
-import { fetchTopGenres } from "../database/queries/genre.queries";
+import { CategoryQueries } from "../database/queries/genre.queries";
 
 export async function getTopGenres(from: Date, to: Date, limit: number = 10) {
-  return fetchTopGenres(limit, from, to);
+  return CategoryQueries.fetchTop(limit, from, to);
 }

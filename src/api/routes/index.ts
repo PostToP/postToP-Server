@@ -3,7 +3,7 @@ import { urlencoded, json } from "body-parser";
 import cors from "cors";
 import { getDebugRequestHandler } from "../controllers/debug.controller";
 import { getArtistRequestHandler } from "../controllers/artist.controller";
-import { filterMusicRequestHandler, getMusicRequestHandler } from "../controllers/music.controller";
+import { getMusicRequestHandler } from "../controllers/music.controller";
 import { getGenresRequestHandler } from "../controllers/genre.controller";
 import { processErrorMiddleware } from "../middleware/error.middleware";
 import { logRequestMiddleware } from "../middleware/logger.middleware";
@@ -30,7 +30,6 @@ export function setupAPIRoutes() {
     app.get("/music", getMusicRequestHandler);
     app.get("/genre", getGenresRequestHandler);
     app.get("/auth", authRequestHandler)
-    app.post("/filter", filterMusicRequestHandler);
 
     app.use(processErrorMiddleware);
     return app;

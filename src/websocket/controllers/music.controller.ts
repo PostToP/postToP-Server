@@ -1,4 +1,4 @@
-import { fetchIsMusic, fetchVideoDataAll } from "../../database/queries/video.queries";
+import { VideoQueries } from "../../database/queries/video.queries";
 import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus } from "../../interface/websocket";
 import { getOrFetchVideo, listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
@@ -59,8 +59,8 @@ async function startedListeningToMusicWebsocketHandler(
     data: VideoRequestData,
 ) {
     const videoID = await getOrFetchVideo(data.watchID);
-    const isMusic = await fetchIsMusic(videoID);
-    const videoData = await fetchVideoDataAll(videoID);
+    const isMusic = await VideoQueries.fetchIsMusic(videoID);
+    const videoData = await VideoQueries.fetchDataAll(videoID);
 
     if (!videoData) {
         return;

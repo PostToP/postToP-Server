@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { fetchAll } from "../../database/queries/misc.queries";
 import { logger } from "../../utils/logger";
+import { MiscQueries } from "../../database/queries/misc.queries";
 
 export async function getDebugRequestHandler(_req: Request, res: Response) {
     try {
-        const data = await fetchAll();
+        const data = await MiscQueries.fetchAll();
         res.status(200).json(data);
     } catch (error) {
         logger.error("Debug endpoint error:", error);
