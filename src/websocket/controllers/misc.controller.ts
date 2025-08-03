@@ -40,7 +40,7 @@ export async function eavesdropWebsocketHandler(
     data: any,
 ) {
     clearTimeout(ws.disconnectTimeout);
-    const user = await UserQueries.fetchByHandle(data.handle);
+    const user = await UserQueries.fetchBy(data.handle, "handle");
 
     if (!user) {
         ws.send(JSON.stringify({
