@@ -11,6 +11,8 @@ import { authRequestHandler } from "../controllers/auth.controller";
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from "../../utils/swagger";
 import "express-async-errors";
+import { authMiddleware } from "../middleware/auth.middelware";
+import { postReviewRequestHandler } from "../controllers/review.controller";
 
 export function setupAPIRoutes() {
     const app = express();
@@ -30,6 +32,7 @@ export function setupAPIRoutes() {
     app.get("/music", getMusicRequestHandler);
     app.get("/genre", getGenresRequestHandler);
     app.get("/auth", authRequestHandler)
+    app.post("/review/music", authMiddleware, postReviewRequestHandler)
 
     app.use(processErrorMiddleware);
     return app;

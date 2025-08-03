@@ -53,6 +53,31 @@ export class VideoQueries {
 
     static async fetchIsMusic(videoID: string) {
         const db = DatabaseManager.getInstance();
+        // admin submitted data
+        const res = await db
+            .selectFrom('posttop.is_music_video')
+            .where('video_id', '=', videoID)
+            .where('submitted_by_id', 'in', db.selectFrom('posttop.user_role').innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id').select('user_id').where('posttop.role.name', '=', 'admin'))
+            .selectAll()
+            .executeTakeFirst();
+
+        if (res) {
+            return res;
+        }
+
+        // AI submitted data
+        const aiRes = await db
+            .selectFrom('posttop.is_music_video')
+            .where('video_id', '=', videoID)
+            .where('submitted_by_id', 'in', db.selectFrom('posttop.user_role').innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id').select('user_id').where('posttop.role.name', '=', 'ai'))
+            .selectAll()
+            .executeTakeFirst();
+
+        if (aiRes) {
+            return aiRes;
+        }
+
+        // category based data (TODO backup, should be removed after AI implemented)
         return db
             .selectFrom('posttop.video_category')
             .innerJoin('posttop.video', 'posttop.video_category.video_id', 'posttop.video.id')
@@ -61,6 +86,19 @@ export class VideoQueries {
             .where('posttop.video.id', '=', videoID)
             .selectAll()
             .executeTakeFirst();
+    }
+
+    static async insertIsMusic(videoID: string, userID: number, is_music: boolean) {
+        const db = DatabaseManager.getInstance();
+        return db
+            .insertInto('posttop.is_music_video')
+            .values({
+                video_id: videoID,
+                submitted_by_id: userID,
+                is_music: is_music,
+            })
+            .onConflict((oc) => oc.doNothing())
+            .execute();
     }
 
     static async fetchDataAll(videoID: string) {

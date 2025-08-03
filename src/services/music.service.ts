@@ -57,3 +57,11 @@ async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   return videoID!.id;
 }
 
+export async function addUserReview(videoID: string, userID: number, is_music: boolean) {
+  const db_id = await VideoQueries.fetch(videoID);
+  if (!db_id) {
+    throw new Error("Video not found");
+  }
+  const review = await VideoQueries.insertIsMusic(db_id.id, userID, is_music);
+  return review;
+}
