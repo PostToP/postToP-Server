@@ -22,6 +22,15 @@ export class DatabaseManager {
         }),
       }),
     });
+    await this.testConnection();
+  }
+
+  private static async testConnection(): Promise<void> {
+    try {
+      await this._db!.selectFrom('posttop.video').selectAll().execute();
+    } catch (error) {
+      throw error;
+    }
   }
 
 
