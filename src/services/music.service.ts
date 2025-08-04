@@ -8,7 +8,7 @@ import { convertYoutubeVideoDetails, getYoutubeVideoDetails } from "./youtube.se
 export async function listenedToMusic(watchID: string, userID: number) {
   const videoID = await getOrFetchVideo(watchID);
 
-  if ((await VideoQueries.fetchIsMusic(videoID)) == null) {
+  if ((await getVideoIsMusic(videoID)) == null) {
     return false;
   }
 
@@ -64,4 +64,27 @@ export async function addUserReview(videoID: string, userID: number, is_music: b
   }
   const review = await VideoQueries.insertIsMusic(db_id.id, userID, is_music);
   return review;
+}
+
+export async function getVideoIsMusic(db_id: string) {
+  const is_music_admin = await VideoQueries.fetchIsMusicByAdmin(db_id);
+  if (is_music_admin) {
+    return {
+      is_music: is_music_admin.is_music,
+      reviewed: true,
+    }
+  }
+  const is_music_ai = await VideoQueries.fetchIsMusicByAI(db_id);
+  if (is_music_ai) {
+    return {
+      is_music: is_music_ai.is_music,
+      reviewed: false,
+    }
+  }
+
+  const is_music_category = await VideoQueries.fetchIsMusicByCategory(db_id);
+  return {
+    is_music: is_music_category != null,
+    reviewed: false,
+  };
 }

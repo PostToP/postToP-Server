@@ -1,6 +1,6 @@
 import { VideoQueries } from "../../database/queries/video.queries";
 import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus } from "../../interface/websocket";
-import { getOrFetchVideo, listenedToMusic } from "../../services/music.service";
+import { getOrFetchVideo, getVideoIsMusic, listenedToMusic } from "../../services/music.service";
 import { logger } from "../../utils/logger";
 import { announceSongToEvedroppers } from "./misc.controller";
 
@@ -59,7 +59,7 @@ async function startedListeningToMusicWebsocketHandler(
     data: VideoRequestData,
 ) {
     const videoID = await getOrFetchVideo(data.watchID);
-    const isMusic = await VideoQueries.fetchIsMusic(videoID);
+    const isMusic = await getVideoIsMusic(videoID);
     const videoData = await VideoQueries.fetchDataAll(videoID);
 
     if (!videoData) {
@@ -75,7 +75,7 @@ async function startedListeningToMusicWebsocketHandler(
         },
         duration: videoData.duration,
         coverImage: "https://i.ytimg.com/vi/" + data.watchID + "/hqdefault.jpg",
-        isMusic: isMusic !== null,
+        isMusic: isMusic,
     };
 
     ws.send(JSON.stringify({
@@ -92,7 +92,7 @@ async function startedListeningToMusicWebsocketHandler(
         updatedAt: new Date(),
     };
 
-    if (!isMusic)
+    if (!isMusic.is_music)
         return;
 
     announceSongToEvedroppers(ws.userId!, {

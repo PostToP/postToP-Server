@@ -51,33 +51,30 @@ export class VideoQueries {
             .execute();
     }
 
-    static async fetchIsMusic(videoID: string) {
+
+    static async fetchIsMusicByAdmin(videoID: string) {
         const db = DatabaseManager.getInstance();
-        // admin submitted data
-        const res = await db
+        return db
             .selectFrom('posttop.is_music_video')
             .where('video_id', '=', videoID)
-            .where('submitted_by_id', 'in', db.selectFrom('posttop.user_role').innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id').select('user_id').where('posttop.role.name', '=', 'admin'))
+            .where('submitted_by_id', 'in', db.selectFrom('posttop.user_role').innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id').select('user_id').where('posttop.role.name', '=', 'Admin'))
             .selectAll()
             .executeTakeFirst();
+    }
 
-        if (res) {
-            return res;
-        }
-
-        // AI submitted data
-        const aiRes = await db
+    static async fetchIsMusicByAI(videoID: string) {
+        const db = DatabaseManager.getInstance();
+        return db
             .selectFrom('posttop.is_music_video')
             .where('video_id', '=', videoID)
             .where('submitted_by_id', 'in', db.selectFrom('posttop.user_role').innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id').select('user_id').where('posttop.role.name', '=', 'ai'))
             .selectAll()
             .executeTakeFirst();
+    }
 
-        if (aiRes) {
-            return aiRes;
-        }
-
-        // category based data (TODO backup, should be removed after AI implemented)
+    // TODO: remove this after AI implemented
+    static async fetchIsMusicByCategory(videoID: string) {
+        const db = DatabaseManager.getInstance();
         return db
             .selectFrom('posttop.video_category')
             .innerJoin('posttop.video', 'posttop.video_category.video_id', 'posttop.video.id')
