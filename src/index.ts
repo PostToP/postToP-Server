@@ -38,7 +38,7 @@ async function startServer(port: number) {
   process.on("SIGTERM", () => exitHandler("SIGTERM"));
 
   process.on("unhandledRejection", (reason, promise) => {
-    logger.error("Unhandled Rejection at:", promise, "reason:", reason);
+    logger.error(`Unhandled Rejection at: ${JSON.stringify(promise)}, reason: ${reason}`);
     if (process.env.NODE_ENV !== "production") {
       exitHandler("unhandledRejection");
     }
