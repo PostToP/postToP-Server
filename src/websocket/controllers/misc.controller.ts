@@ -2,6 +2,7 @@ import { wssServer } from "..";
 import { UserQueries } from "../../database/queries/user.queries";
 import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
 import { logger } from "../../utils/logger";
+import { WebSocket } from "ws";
 
 export function heartbeatWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
     if (!ws.authenticated || ws.userId === undefined) {
