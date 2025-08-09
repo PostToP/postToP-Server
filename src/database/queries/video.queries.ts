@@ -1,3 +1,4 @@
+import { sql } from "kysely";
 import { DatabaseManager } from "..";
 
 export class VideoQueries {
@@ -110,5 +111,48 @@ export class VideoQueries {
             .selectAll()
             .where('posttop.video.id', '=', videoID)
             .executeTakeFirst();
+    }
+
+    static async fetchAll({
+        limit = 10,
+        page = 0,
+        sortBy = "alphabetical",
+        reverse = false,
+        onlyUnreviewed = false,
+    }: {
+        limit?: number;
+        page?: number;
+        sortBy?: string;
+        reverse?: boolean;
+        onlyUnreviewed?: boolean;
+    }) {
+        const db = DatabaseManager.getInstance();
+        let query = db
+            .selectFrom('posttop.video')
+            .innerJoin('posttop.video_metadata',
+                (join) => join
+                    .onRef('posttop.video.id', '=', 'posttop.video_metadata.video_id')
+                    .onRef('posttop.video.default_language', '=', 'posttop.video_metadata.language'))
+            .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id')
+
+
+        if (sortBy) {
+            const columns = {
+                "alphabetical": sql`posttop.video_metadata.title`,
+                "duration": sql`posttop.video.duration`,
+                "date": sql`posttop.video.created_at`,
+                "random": sql`random()`,
+            };
+
+            query = query.orderBy(columns[sortBy as keyof typeof columns], reverse ? 'desc' : 'asc');
+        }
+
+        if (onlyUnreviewed) {
+            query = query.where('posttop.is_music_video.video_id', 'is', null);
+        }
+
+        query = query.limit(limit).offset(page * limit);
+
+        return query.selectAll().execute();
     }
 }

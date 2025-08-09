@@ -13,6 +13,7 @@ import { swaggerSpec } from "../../utils/swagger";
 import "express-async-errors";
 import { authMiddleware } from "../middleware/auth.middelware";
 import { postReviewRequestHandler } from "../controllers/review.controller";
+import { getVideosController } from "../controllers/video.controller";
 
 export function setupAPIRoutes() {
     const app = express();
@@ -33,6 +34,7 @@ export function setupAPIRoutes() {
     app.get("/genre", getGenresRequestHandler);
     app.get("/auth", authRequestHandler)
     app.post("/review/music", authMiddleware, postReviewRequestHandler)
+    app.get("/videos", getVideosController);
 
     app.use(processErrorMiddleware);
     return app;

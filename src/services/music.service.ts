@@ -66,6 +66,22 @@ export async function addUserReview(videoID: string, userID: number, is_music: b
   return review;
 }
 
+export async function getAllVideos({
+  limit = 10,
+  page = 0,
+  sortBy = "alphabetical",
+  reverse = false,
+  onlyUnreviewed = false,
+}: {
+  limit?: number;
+  page?: number;
+  sortBy?: string;
+  reverse?: boolean;
+  onlyUnreviewed?: boolean;
+}) {
+  return VideoQueries.fetchAll({ limit, page, sortBy, reverse, onlyUnreviewed });
+}
+
 export async function getVideoIsMusic(db_id: string) {
   const is_music_admin = await VideoQueries.fetchIsMusicByAdmin(db_id);
   if (is_music_admin) {
