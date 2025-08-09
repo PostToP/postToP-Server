@@ -32,7 +32,7 @@ export function setupAPIRoutes() {
     app.get("/artist", getArtistRequestHandler);
     app.get("/music", getMusicRequestHandler);
     app.get("/genre", getGenresRequestHandler);
-    app.get("/auth", authRequestHandler)
+    app.post("/auth", authRequestHandler)
     app.post("/review/music", authMiddleware, postReviewRequestHandler)
     app.get("/videos", getVideosController);
 
