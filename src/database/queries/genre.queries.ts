@@ -2,6 +2,10 @@ import { DatabaseManager } from "..";
 
 export class CategoryQueries {
     static async insertToVideo(videoID: string, genres: number[]) {
+        if (!genres || genres.length === 0) {
+            return;
+        }
+
         const db = DatabaseManager.getInstance();
         db.insertInto('posttop.video_category')
             .values(genres.map((genre) => ({
@@ -15,9 +19,13 @@ export class CategoryQueries {
     static async insert(categories: string[]) {
         const db = DatabaseManager.getInstance();
 
+        if (!categories || categories.length === 0) {
+            return [];
+        }
+
         const exists = await db.selectFrom('posttop.category')
             .select('id')
-            .where('name', 'in', categories)
+            .where('name', 'in', categories || [])
             .execute();
 
         if (exists.length > 0) {
