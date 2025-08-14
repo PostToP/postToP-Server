@@ -58,6 +58,15 @@ async function startedListeningToMusicWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: VideoRequestData,
 ) {
+    if (data.watchID === undefined || data.watchID === "") {
+        ws.send(JSON.stringify({
+            op: ResponseOperationType.ERROR,
+            d: { message: "Invalid watchID" },
+        }));
+        logger.error(`User ${ws.userId} sent invalid watchID`);
+        return;
+    }
+
     const videoID = await getOrFetchVideo(data.watchID);
     const isMusic = await getVideoIsMusic(videoID);
     const videoData = await VideoQueries.fetchDataAll(videoID);
