@@ -1,4 +1,6 @@
+import { Transaction } from "kysely";
 import { DatabaseManager } from "..";
+import { DB } from "../../model/db";
 
 export class ArtistQueries {
     static async fetchTop(limit: number = 5, from: Date, to: Date) {
@@ -26,7 +28,7 @@ export class ArtistQueries {
             .executeTakeFirst();
     }
 
-    static async insert(artistID: string, name: string) {
+    static async insert(trx: Transaction<DB>, artistID: string, name: string) {
         const db = DatabaseManager.getInstance();
 
         const exists = await db.selectFrom('posttop.channel')

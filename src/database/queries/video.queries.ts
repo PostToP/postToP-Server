@@ -1,5 +1,6 @@
-import { sql } from "kysely";
+import { sql, Transaction } from "kysely";
 import { DatabaseManager } from "..";
+import { DB } from "../../model/db";
 
 export class VideoQueries {
     static async fetch(videoID: string) {
@@ -12,6 +13,7 @@ export class VideoQueries {
     }
 
     static async insert(
+        trx: Transaction<DB>,
         videoID: string,
         artistID: number,
         duration: number,
@@ -43,7 +45,7 @@ export class VideoQueries {
             .executeTakeFirst();
     }
 
-    static async insertMetadata(id: string, language: string, title: string, description: string) {
+    static async insertMetadata(trx: Transaction<DB>, id: string, language: string, title: string, description: string) {
         const db = DatabaseManager.getInstance();
         return db
             .insertInto('posttop.video_metadata')

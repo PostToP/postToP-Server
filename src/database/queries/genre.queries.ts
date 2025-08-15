@@ -1,7 +1,9 @@
+import { Transaction } from "kysely";
 import { DatabaseManager } from "..";
+import { DB } from "../../model/db";
 
 export class CategoryQueries {
-    static async insertToVideo(videoID: string, genres: number[]) {
+    static async insertToVideo(trx: Transaction<DB>, videoID: string, genres: number[]) {
         if (!genres || genres.length === 0) {
             return;
         }
@@ -16,7 +18,7 @@ export class CategoryQueries {
             .execute();
     }
 
-    static async insert(categories: string[]) {
+    static async insert(trx: Transaction<DB>, categories: string[]) {
         const db = DatabaseManager.getInstance();
 
         if (!categories || categories.length === 0) {

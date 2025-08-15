@@ -1,3 +1,4 @@
+import { DatabaseManager } from "../database";
 import { ArtistQueries } from "../database/queries/artist.queries";
 import { CategoryQueries } from "../database/queries/genre.queries";
 import { MusicQueries } from "../database/queries/music.queries";
@@ -35,26 +36,30 @@ export async function getTopMusic(from: Date, to: Date, limit: number = 10) {
   return MusicQueries.fetchTop(limit, from, to);
 }
 
-// TODO: do this in a transaction
 async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   const data = convertYoutubeVideoDetails(yt_video_details);
-  const insertedArtist = await ArtistQueries.insert(data.channelId, data.channelTitle);
-  const categoriesID = await CategoryQueries.insert(data.topicCategories);
-  const defaultLanguage = data.defaultLanguage || data.defaultAudioLanguage || "undefined";
-  const videoID = await VideoQueries.insert(
-    data.id,
-    insertedArtist!.id,
-    data.duration,
-    data.categoryId,
-    defaultLanguage
-  );
-  await CategoryQueries.insertToVideo(videoID!.id, categoriesID.map((i) => i.id));
-  await VideoQueries.insertMetadata(videoID!.id, defaultLanguage, data.title, data.description);
-  for (const [lang, localization] of Object.entries(data.localizations)) {
-    if (lang === defaultLanguage) continue;
-    await VideoQueries.insertMetadata(videoID!.id, lang, localization.title, localization.description);
-  }
-  return videoID!.id;
+  const db = DatabaseManager.getInstance();
+
+  return db.transaction().execute(async (trx) => {
+    const insertedArtist = await ArtistQueries.insert(trx, data.channelId, data.channelTitle);
+    const categoriesID = await CategoryQueries.insert(trx, data.topicCategories);
+    const defaultLanguage = data.defaultLanguage || data.defaultAudioLanguage || "undefined";
+    const videoID = await VideoQueries.insert(
+      trx,
+      data.id,
+      insertedArtist!.id,
+      data.duration,
+      data.categoryId,
+      defaultLanguage
+    );
+    await CategoryQueries.insertToVideo(trx, videoID!.id, categoriesID.map((i) => i.id));
+    await VideoQueries.insertMetadata(trx, videoID!.id, defaultLanguage, data.title, data.description);
+    for (const [lang, localization] of Object.entries(data.localizations)) {
+      if (lang === defaultLanguage) continue;
+      await VideoQueries.insertMetadata(trx, videoID!.id, lang, localization.title, localization.description);
+    }
+    return videoID!.id;
+  });
 }
 
 export async function addUserReview(videoID: string, userID: number, is_music: boolean) {
