@@ -4,6 +4,7 @@ import { CategoryQueries } from "../database/queries/genre.queries";
 import { MusicQueries } from "../database/queries/music.queries";
 import { VideoQueries } from "../database/queries/video.queries";
 import { YouTubeApiResponse } from "../interface/youtube";
+import { fetchMusicAnalysis } from "./ai.service";
 import { convertYoutubeVideoDetails, getYoutubeVideoDetails } from "./youtube.service";
 
 export async function listenedToMusic(watchID: string, userID: number) {
@@ -84,7 +85,12 @@ export async function getAllVideos({
   reverse?: boolean;
   onlyUnreviewed?: boolean;
 }) {
-  return VideoQueries.fetchAll({ limit, page, sortBy, reverse, onlyUnreviewed });
+  const videos = VideoQueries.fetchAll(limit, page, sortBy, reverse, onlyUnreviewed);
+  const numberOfVideos = await VideoQueries.numberOfVideos(limit, page, sortBy, reverse, onlyUnreviewed);
+  return {
+    videos,
+    numberOfVideos,
+  };
 }
 
 export async function getVideoIsMusic(db_id: string) {
@@ -103,9 +109,11 @@ export async function getVideoIsMusic(db_id: string) {
     }
   }
 
-  const is_music_category = await VideoQueries.fetchIsMusicByCategory(db_id);
+  const ai_prediction = await fetchMusicAnalysis(db_id);
+  const is_music_by_ai = ai_prediction >= 0.5;
+  VideoQueries.insertIsMusic(db_id, 3, is_music_by_ai); // TODO: somehow get an actual user ID for AI
   return {
-    is_music: is_music_category != null,
+    is_music: is_music_by_ai,
     reviewed: false,
   };
 }

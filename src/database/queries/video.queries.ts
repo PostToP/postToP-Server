@@ -12,6 +12,29 @@ export class VideoQueries {
             .executeTakeFirst();
     }
 
+    static async fetchAiData(id: string) {
+        const db = DatabaseManager.getInstance();
+
+        return db
+            .selectFrom('posttop.video')
+            .innerJoin('posttop.video_metadata',
+                (join) => join
+                    .onRef('posttop.video.id', '=', 'posttop.video_metadata.video_id')
+                    .onRef('posttop.video_metadata.language', '=', 'posttop.video.default_language'))
+            .innerJoin('posttop.channel as channel', 'posttop.video.channel_id', 'channel.id')
+            .leftJoin((qb) => {
+                return qb
+                    .selectFrom('posttop.video_category')
+                    .innerJoin('posttop.category', 'posttop.video_category.category_id', 'posttop.category.id')
+                    .select([sql`array_agg(posttop.category.name)`.as('categories'), 'posttop.video_category.video_id'])
+                    .groupBy('posttop.video_category.video_id')
+                    .as('categories');
+            }, (join) => join.onRef('posttop.video.id', '=', 'categories.video_id'))
+            .selectAll()
+            .where('posttop.video.id', '=', id)
+            .executeTakeFirst();
+    }
+
     static async insert(
         trx: Transaction<DB>,
         videoID: string,
