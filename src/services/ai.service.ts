@@ -1,6 +1,7 @@
+import { UserQueries } from "../database/queries/user.queries";
 import { VideoQueries } from "../database/queries/video.queries";
 
-export async function fetchMusicAnalysis(videoID: string) {
+async function fetchMusicAnalysis(videoID: string) {
     const data = await VideoQueries.fetchAiData(videoID);
     const body = {
         title: data?.title,
@@ -17,6 +18,24 @@ export async function fetchMusicAnalysis(videoID: string) {
     });
 
     const result = await analysis.json();
-    return result.prediction as number;
+    return result as {
+        prediction: number,
+        version: `v${number}.${number}.${number}`,
+    };
 
+}
+
+export async function getOrFetchAiIsMusic(videoID: string) {
+    const is_music_ai = await VideoQueries.fetchIsMusicByAI(videoID);
+    if (is_music_ai) {
+        return is_music_ai.is_music;
+    }
+    const currentResponse = await fetchMusicAnalysis(videoID);
+    const is_music = currentResponse.prediction >= 0.5;
+    const aiUserID = await UserQueries.fetchAI(currentResponse.version);
+    if (!aiUserID) {
+        throw new Error("AI user not found");
+    }
+    await VideoQueries.insertIsMusic(videoID, aiUserID?.id, is_music);
+    return is_music;
 }

@@ -1,5 +1,7 @@
 import { DatabaseManager } from "..";
 
+type AiVersion = `v${number}.${number}.${number}`;
+
 export class UserQueries {
     static async fetchBy(identifier: string | number,
         type: 'username' | 'handle' | 'id',
@@ -17,6 +19,15 @@ export class UserQueries {
         return db.selectFrom("posttop.user")
             .select(["password_hash"])
             .where("username", "=", username)
+            .executeTakeFirst();
+    }
+
+    static async fetchAI(version: AiVersion) {
+        const modelName = `model@${version}`;
+        const db = DatabaseManager.getInstance();
+        return db.selectFrom("posttop.user")
+            .selectAll()
+            .where("username", "=", modelName)
             .executeTakeFirst();
     }
 }
