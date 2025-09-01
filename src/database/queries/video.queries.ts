@@ -138,19 +138,7 @@ export class VideoQueries {
             .executeTakeFirst();
     }
 
-    static async fetchAll({
-        limit = 10,
-        page = 0,
-        sortBy = "alphabetical",
-        reverse = false,
-        onlyUnreviewed = false,
-    }: {
-        limit?: number;
-        page?: number;
-        sortBy?: string;
-        reverse?: boolean;
-        onlyUnreviewed?: boolean;
-    }) {
+    private static async getQueryForAll(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
         const db = DatabaseManager.getInstance();
         let query = db
             .selectFrom('posttop.video')
@@ -158,8 +146,7 @@ export class VideoQueries {
                 (join) => join
                     .onRef('posttop.video.id', '=', 'posttop.video_metadata.video_id')
                     .onRef('posttop.video.default_language', '=', 'posttop.video_metadata.language'))
-            .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id')
-
+            .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id');
 
         if (sortBy) {
             const columns = {
@@ -178,6 +165,19 @@ export class VideoQueries {
 
         query = query.limit(limit).offset(page * limit);
 
+        return query;
+    }
+
+    static async fetchAll(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
+        const query = await this.getQueryForAll(limit, page, sortBy, reverse, onlyUnreviewed);
         return query.selectAll().execute();
+    }
+
+    static async numberOfVideos(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
+        const query = await this.getQueryForAll(limit, page, sortBy, reverse, onlyUnreviewed);
+        const totalCount = await query.select((eb) => [
+            sql`count(*)`.as('total_count'),
+        ]).executeTakeFirstOrThrow();
+        return totalCount.total_count as number;
     }
 }

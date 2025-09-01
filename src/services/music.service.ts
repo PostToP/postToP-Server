@@ -85,11 +85,15 @@ export async function getAllVideos({
   reverse?: boolean;
   onlyUnreviewed?: boolean;
 }) {
-  const videos = VideoQueries.fetchAll(limit, page, sortBy, reverse, onlyUnreviewed);
+  const videos = await VideoQueries.fetchAll(limit, page, sortBy, reverse, onlyUnreviewed);
   const numberOfVideos = await VideoQueries.numberOfVideos(limit, page, sortBy, reverse, onlyUnreviewed);
+  const pages = Math.ceil(numberOfVideos / limit);
   return {
     videos,
-    numberOfVideos,
+    pagination: {
+      totalVideos: numberOfVideos,
+      totalPages: pages,
+    }
   };
 }
 
