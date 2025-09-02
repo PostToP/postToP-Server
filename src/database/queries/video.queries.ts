@@ -2,6 +2,17 @@ import { sql, Transaction } from "kysely";
 import { DatabaseManager } from "..";
 import { DB } from "../../model/db";
 
+export interface QueryForAllParams {
+    limit?: number;
+    page?: number;
+    sortBy?: string;
+    reverse?: boolean;
+    filters?: {
+        verified?: boolean;
+        music?: boolean;
+    }
+}
+
 export class VideoQueries {
     static async fetch(videoID: string) {
         const db = DatabaseManager.getInstance();
@@ -138,8 +149,11 @@ export class VideoQueries {
             .executeTakeFirst();
     }
 
-    private static async getQueryForAll(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
+    private static async getQueryForAll(params: QueryForAllParams) {
         const db = DatabaseManager.getInstance();
+        const page = params.page || 0;
+        const limit = params.limit || 20;
+
         let query = db
             .selectFrom('posttop.video')
             .innerJoin('posttop.video_metadata',
@@ -148,7 +162,7 @@ export class VideoQueries {
                     .onRef('posttop.video.default_language', '=', 'posttop.video_metadata.language'))
             .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id');
 
-        if (sortBy) {
+        if (params.sortBy) {
             const columns = {
                 "alphabetical": sql`posttop.video_metadata.title`,
                 "duration": sql`posttop.video.duration`,
@@ -156,11 +170,37 @@ export class VideoQueries {
                 "random": sql`random()`,
             };
 
-            query = query.orderBy(columns[sortBy as keyof typeof columns], reverse ? 'desc' : 'asc');
+            query = query.orderBy(columns[params.sortBy as keyof typeof columns], params.reverse ? 'desc' : 'asc');
         }
 
-        if (onlyUnreviewed) {
-            query = query.where('posttop.is_music_video.video_id', 'is', null);
+        if (params.filters?.verified != undefined) {
+            console.log("filtering by verified", params.filters.verified);
+            if (params.filters.verified) {
+                query = query.where('posttop.is_music_video.submitted_by_id', 'in',
+                    db.selectFrom('posttop.user_role')
+                        .innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id')
+                        .select('user_id')
+                        .where('posttop.role.name', '=', 'Admin'));
+            } else {
+                query = query.where(eb => eb.or([
+                    eb('posttop.is_music_video.video_id', 'not in',
+                        db.selectFrom('posttop.is_music_video')
+                            .innerJoin('posttop.user_role', 'posttop.is_music_video.submitted_by_id', 'posttop.user_role.user_id')
+                            .innerJoin('posttop.role', 'posttop.user_role.role_id', 'posttop.role.id')
+                            .select('posttop.is_music_video.video_id')
+                            .where('posttop.role.name', '=', 'Admin')
+                    ),
+                    eb('posttop.is_music_video.video_id', 'is', null)
+                ]));
+            }
+        }
+
+        if (params.filters?.music != undefined) {
+            if (params.filters.music) {
+                query = query.where('posttop.is_music_video.is_music', '=', true);
+            } else {
+                query = query.where('posttop.is_music_video.is_music', '=', false);
+            }
         }
 
         query = query.limit(limit).offset(page * limit);
@@ -168,13 +208,13 @@ export class VideoQueries {
         return query;
     }
 
-    static async fetchAll(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
-        const query = await this.getQueryForAll(limit, page, sortBy, reverse, onlyUnreviewed);
+    static async fetchAll(params: QueryForAllParams) {
+        const query = await this.getQueryForAll(params);
         return query.selectAll().execute();
     }
 
-    static async numberOfVideos(limit: number, page: number, sortBy: string, reverse: boolean, onlyUnreviewed: boolean) {
-        const query = await this.getQueryForAll(limit, page, sortBy, reverse, onlyUnreviewed);
+    static async numberOfVideos(params: QueryForAllParams) {
+        const query = await this.getQueryForAll(params);
         const totalCount = await query.select((eb) => [
             sql`count(*)`.as('total_count'),
         ]).executeTakeFirstOrThrow();

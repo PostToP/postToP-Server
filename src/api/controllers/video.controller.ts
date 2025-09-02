@@ -8,12 +8,20 @@ export async function getVideosController(req: Request, res: Response) {
     const page = parseInt(query.page as string) || 0;
     const sortBy = query.sortBy as string || 'alphabetical';
     const reverse = query.reverse === 'true';
-    const onlyUnreviewed = query.onlyUnreviewed === 'true';
+    let verified = query.verified as any | undefined;
+    let music = query.music as any | undefined;
+    if (music !== undefined) {
+        music = music as string === 'true' ? true : false;
+    }
+    if (verified !== undefined) {
+        verified = verified === 'true' ? true : false;
+    }
+
 
     // TODO validate query parameters
 
     try {
-        const reviews = await getAllVideos({ limit, page, sortBy, reverse, onlyUnreviewed });
+        const reviews = await getAllVideos({ limit, page, sortBy, reverse, filters: { verified, music } });
         return res.status(200).json(reviews);
     } catch (error) {
         console.error("Error fetching reviews:", error);

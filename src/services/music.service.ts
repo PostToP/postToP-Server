@@ -2,7 +2,7 @@ import { DatabaseManager } from "../database";
 import { ArtistQueries } from "../database/queries/artist.queries";
 import { CategoryQueries } from "../database/queries/genre.queries";
 import { MusicQueries } from "../database/queries/music.queries";
-import { VideoQueries } from "../database/queries/video.queries";
+import { QueryForAllParams, VideoQueries } from "../database/queries/video.queries";
 import { YouTubeApiResponse } from "../interface/youtube";
 import { getOrFetchAiIsMusic } from "./ai.service";
 import { convertYoutubeVideoDetails, getYoutubeVideoDetails } from "./youtube.service";
@@ -72,21 +72,10 @@ export async function addUserReview(videoID: string, userID: number, is_music: b
   return review;
 }
 
-export async function getAllVideos({
-  limit = 10,
-  page = 0,
-  sortBy = "alphabetical",
-  reverse = false,
-  onlyUnreviewed = false,
-}: {
-  limit?: number;
-  page?: number;
-  sortBy?: string;
-  reverse?: boolean;
-  onlyUnreviewed?: boolean;
-}) {
-  const videos = await VideoQueries.fetchAll(limit, page, sortBy, reverse, onlyUnreviewed);
-  const numberOfVideos = await VideoQueries.numberOfVideos(limit, page, sortBy, reverse, onlyUnreviewed);
+export async function getAllVideos(params: QueryForAllParams) {
+  const limit = params.limit || 20;
+  const videos = await VideoQueries.fetchAll(params);
+  const numberOfVideos = await VideoQueries.numberOfVideos(params);
   const pages = Math.ceil(numberOfVideos / limit);
   return {
     videos,
