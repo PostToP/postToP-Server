@@ -42,9 +42,10 @@ function websocketConnectionHandler(
 }
 
 async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message: RawData) {
-  logger.info(`Received message from userId ${ws.userId}: ${message}`);
   const json = JSON.parse(message.toString()) as WebSocketRequest;
-
+  if (json.op !== RequestOperationType.HEARTBEAT) {
+    logger.info(`Received message from userId ${ws.userId}: ${message}`);
+  }
   const phase = ws.phase;
   const operation = json.op;
   const data = json.d;
