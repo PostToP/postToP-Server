@@ -29,14 +29,6 @@ export async function getOrFetchVideo(watchID: string) {
   return ID;
 }
 
-export async function getLatestMusic(limit: number = 10) {
-  return MusicQueries.fetchLatest(limit);
-}
-
-export async function getTopMusic(from: Date, to: Date, limit: number = 10) {
-  return MusicQueries.fetchTop(limit, from, to);
-}
-
 async function addNewVideoToDatabase(yt_video_details: YouTubeApiResponse) {
   const data = convertYoutubeVideoDetails(yt_video_details);
   const db = DatabaseManager.getInstance();
