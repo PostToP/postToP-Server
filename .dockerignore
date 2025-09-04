@@ -1,2 +1,5 @@
 .vscode/
+dist/
+node_modules/
 *.sqlite*
+*.tar
