@@ -10,6 +10,7 @@ export interface QueryForAllParams {
     filters?: {
         verified?: boolean;
         music?: boolean;
+        hasNER?: boolean;
     }
 }
 
@@ -160,7 +161,8 @@ export class VideoQueries {
                 (join) => join
                     .onRef('posttop.video.id', '=', 'posttop.video_metadata.video_id')
                     .onRef('posttop.video.default_language', '=', 'posttop.video_metadata.language'))
-            .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id');
+            .leftJoin('posttop.is_music_video', 'posttop.video.id', 'posttop.is_music_video.video_id')
+            .innerJoin(db.selectFrom('posttop.channel').select(['id', 'name']).as('channel'), 'posttop.video.channel_id', 'channel.id');
 
         if (params.sortBy) {
             const columns = {
@@ -203,6 +205,19 @@ export class VideoQueries {
             }
         }
 
+        if (params.filters?.hasNER != undefined) {
+            if (params.filters.hasNER) {
+                query = query.where('posttop.video.id', 'in',
+                    db.selectFrom('posttop.ner_result')
+                        .select('video_id')
+                );
+            } else {
+                query = query.where('posttop.video.id', 'not in',
+                    db.selectFrom('posttop.ner_result')
+                        .select('video_id')
+                );
+            }
+        }
         query = query.limit(limit).offset(page * limit);
 
         return query;
@@ -219,5 +234,20 @@ export class VideoQueries {
             sql`count(*)`.as('total_count'),
         ]).executeTakeFirstOrThrow();
         return totalCount.total_count as number;
+    }
+
+    static async insertNERReview(videoID: string, userID: number, language: any, namedEntities: { NER: string, text: string, start: number, end: number }[]) {
+        console.log("Inserting NER review", videoID, userID, language, JSON.stringify(namedEntities));
+        const db = DatabaseManager.getInstance();
+        return db
+            .insertInto('posttop.ner_result')
+            .values({
+                video_id: videoID,
+                language: language,
+                submitted_by_id: userID,
+                ner_result: sql`${JSON.stringify(namedEntities)}::jsonb`,
+            })
+            .onConflict((oc) => oc.doNothing())
+            .execute();
     }
 }

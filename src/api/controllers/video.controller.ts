@@ -16,12 +16,16 @@ export async function getVideosController(req: Request, res: Response) {
     if (verified !== undefined) {
         verified = verified === 'true' ? true : false;
     }
+    let hasNER = query.hasNER as any | undefined;
+    if (hasNER !== undefined) {
+        hasNER = hasNER as string === 'true' ? true : false;
+    }
 
 
     // TODO validate query parameters
 
     try {
-        const reviews = await getAllVideos({ limit, page, sortBy, reverse, filters: { verified, music } });
+        const reviews = await getAllVideos({ limit, page, sortBy, reverse, filters: { verified, music, hasNER } });
         return res.status(200).json(reviews);
     } catch (error) {
         console.error("Error fetching reviews:", error);

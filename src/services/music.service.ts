@@ -93,3 +93,12 @@ export async function getVideoIsMusic(db_id: string) {
   }
 
 }
+
+export async function addNERReview(videoID: string, userID: number, language: string, namedEntities: { NER: string, text: string, start: number, end: number }[]) {
+  const db_id = await VideoQueries.fetch(videoID);
+  if (!db_id) {
+    throw new Error("Video not found");
+  }
+  const review = await VideoQueries.insertNERReview(db_id.id, userID, language, namedEntities);
+  return review;
+}
