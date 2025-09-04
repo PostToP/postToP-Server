@@ -1,15 +1,12 @@
 import { Transaction } from "kysely";
-import { DatabaseManager } from "..";
 import { DB } from "../../model/db";
 
 export class CategoryQueries {
     static async insertToVideo(trx: Transaction<DB>, videoID: string, genres: number[]) {
-        if (!genres || genres.length === 0) {
+        if (!genres || genres.length === 0)
             return;
-        }
 
-        const db = DatabaseManager.getInstance();
-        db.insertInto('posttop.video_category')
+        trx.insertInto('posttop.video_category')
             .values(genres.map((genre) => ({
                 video_id: videoID,
                 category_id: genre,
@@ -19,23 +16,18 @@ export class CategoryQueries {
     }
 
     static async insert(trx: Transaction<DB>, categories: string[]) {
-        const db = DatabaseManager.getInstance();
-
-        if (!categories || categories.length === 0) {
+        if (!categories || categories.length === 0)
             return [];
-        }
 
-        const exists = await db.selectFrom('posttop.category')
+        const exists = await trx.selectFrom('posttop.category')
             .select('id')
             .where('name', 'in', categories || [])
             .execute();
 
-        if (exists.length > 0) {
+        if (exists.length > 0)
             return exists;
-        }
 
-
-        return db.insertInto('posttop.category')
+        return trx.insertInto('posttop.category')
             .values(categories.map((category) => ({ name: category })))
             .onConflict((oc) => oc.doNothing())
             .returning('id')

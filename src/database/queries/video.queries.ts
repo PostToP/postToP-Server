@@ -55,9 +55,7 @@ export class VideoQueries {
         main_category_id: number,
         default_language: string,
     ) {
-        const db = DatabaseManager.getInstance();
-
-        const exists = await db
+        const exists = await trx
             .selectFrom('posttop.video')
             .select('id')
             .where('yt_id', '=', videoID)
@@ -67,7 +65,7 @@ export class VideoQueries {
             return exists;
         }
 
-        return db.insertInto('posttop.video')
+        return trx.insertInto('posttop.video')
             .values({
                 yt_id: videoID,
                 channel_id: artistID,
@@ -81,8 +79,7 @@ export class VideoQueries {
     }
 
     static async insertMetadata(trx: Transaction<DB>, id: string, language: string, title: string, description: string) {
-        const db = DatabaseManager.getInstance();
-        return db
+        return trx
             .insertInto('posttop.video_metadata')
             .values({ video_id: id, language, title, description })
             .onConflict((oc) => oc.doNothing())
