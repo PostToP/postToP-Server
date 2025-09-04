@@ -13,6 +13,6 @@ export function processErrorMiddleware(err: Error, _req: Request, res: Response,
         res.status(500).json({ message: "Internal Server Error" });
         return;
     }
-    logger.error("Unexpected error:", err);
+    logger.error("Unexpected error:", { error: err });
     res.status(500).json({ message: "Internal Server Error" });
 }
