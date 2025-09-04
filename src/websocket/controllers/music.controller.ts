@@ -41,10 +41,14 @@ export function videoUpdateWebsocketHandler(
 }
 
 
-function listenedToMusicWebsocketHandler(
+async function listenedToMusicWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: any,
 ) {
+    const videoID = await VideoService.getOrFetch(data.watchID);
+    const isMusic = await MusicService.getVideoIsMusic(videoID);
+    if (!isMusic.is_music)
+        return;
     MusicService.recordListened(data.watchID, ws.userId!)
     announceSongToEvedroppers(ws.userId!, data);
     ws.send(JSON.stringify({
