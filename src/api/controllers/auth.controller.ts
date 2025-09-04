@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { authenticateUser } from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 
 export async function authRequestHandler(req: Request, res: Response) {
@@ -7,7 +7,7 @@ export async function authRequestHandler(req: Request, res: Response) {
     const username = body.username as string;
     const password = body.password as string;
 
-    const token = await authenticateUser(username, password)
+    const token = await AuthService.auth(username, password)
     res.status(200).json({ token });
     return;
 }

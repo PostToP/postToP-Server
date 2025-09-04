@@ -1,5 +1,5 @@
 import { UnathorizedError } from "../../interface/errors";
-import { verifyToken } from "../../services/auth.service";
+import { AuthService } from "../../services/auth.service";
 import { Request, Response } from "express";
 
 export function authMiddleware(req: Request, res: Response, next: Function) {
@@ -8,7 +8,7 @@ export function authMiddleware(req: Request, res: Response, next: Function) {
         throw new UnathorizedError("Authorization token is missing");
     }
 
-    const decoded = verifyToken(token);
+    const decoded = AuthService.verifyToken(token);
     if (!decoded.ok) {
         throw new UnathorizedError("Invalid or expired token");
     }

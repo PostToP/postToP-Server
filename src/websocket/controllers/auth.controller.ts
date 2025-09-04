@@ -1,5 +1,5 @@
 import { ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
-import { verifyToken } from "../../services/auth.service";
+import { AuthService } from "../../services/auth.service";
 import { logger } from "../../utils/logger";
 
 export function authWebsocketHandler(
@@ -7,7 +7,7 @@ export function authWebsocketHandler(
     data: any,
 ) {
     clearTimeout(ws.disconnectTimeout);
-    let verifiedToken = verifyToken(data.token);
+    let verifiedToken = AuthService.verifyToken(data.token);
     if (!verifiedToken.ok) {
         ws.send(JSON.stringify({
             op: ResponseOperationType.ERROR,

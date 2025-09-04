@@ -1,6 +1,7 @@
 import { VideoQueries } from "../../database/queries/video.queries";
 import { ExtendedWebSocketConnection, ListeingData, ResponseOperationType, VideoRequestData, VideoResponseData, VideoStatus } from "../../interface/websocket";
-import { getOrFetchVideo, getVideoIsMusic, listenedToMusic } from "../../services/music.service";
+import { MusicService } from "../../services/music.service";
+import { VideoService } from "../../services/video.service";
 import { logger } from "../../utils/logger";
 import { announceSongToEvedroppers } from "./misc.controller";
 
@@ -44,7 +45,7 @@ function listenedToMusicWebsocketHandler(
     ws: ExtendedWebSocketConnection,
     data: any,
 ) {
-    listenedToMusic(data.watchID, ws.userId!)
+    MusicService.recordListened(data.watchID, ws.userId!)
     announceSongToEvedroppers(ws.userId!, data);
     ws.send(JSON.stringify({
         op: ResponseOperationType.VIDEO_UPDATE,
@@ -67,8 +68,8 @@ async function startedListeningToMusicWebsocketHandler(
         return;
     }
 
-    const videoID = await getOrFetchVideo(data.watchID);
-    const isMusic = await getVideoIsMusic(videoID);
+    const videoID = await VideoService.getOrFetch(data.watchID);
+    const isMusic = await MusicService.getVideoIsMusic(videoID);
     const videoData = await VideoQueries.fetchDataAll(videoID);
 
     if (!videoData) {

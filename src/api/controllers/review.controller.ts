@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { addNERReview, addUserReview } from "../../services/music.service";
+import { ReviewService } from "../../services/review.service";
 
 export async function postIsMusicReviewRequestHandler(req: Request, res: Response) {
     const userID = req.userID!;
@@ -16,7 +16,7 @@ export async function postIsMusicReviewRequestHandler(req: Request, res: Respons
     }
 
     try {
-        await addUserReview(watchID, userID, is_music);
+        await ReviewService.addIsMusicReview(watchID, userID, is_music);
         return res.status(200).json({ message: "Review added successfully" });
     } catch (error) {
         console.error("Error adding review:", error);
@@ -40,7 +40,7 @@ export async function postNERReviewRequestHandler(req: Request, res: Response) {
     }
 
     try {
-        await addNERReview(watchID, userID, language, namedEntities);
+        await ReviewService.addNERReview(watchID, userID, language, namedEntities);
         return res.status(200).json({ message: "NER Review added successfully" });
     } catch (error) {
         console.error("Error adding NER review:", error);

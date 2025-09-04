@@ -107,19 +107,6 @@ export class VideoQueries {
             .executeTakeFirst();
     }
 
-    // TODO: remove this after AI implemented
-    static async fetchIsMusicByCategory(videoID: string) {
-        const db = DatabaseManager.getInstance();
-        return db
-            .selectFrom('posttop.video_category')
-            .innerJoin('posttop.video', 'posttop.video_category.video_id', 'posttop.video.id')
-            .innerJoin('posttop.category', 'posttop.video_category.category_id', 'posttop.category.id')
-            .where("name", "=", "https://en.wikipedia.org/wiki/Music")
-            .where('posttop.video.id', '=', videoID)
-            .selectAll()
-            .executeTakeFirst();
-    }
-
     static async insertIsMusic(videoID: string, userID: number, is_music: boolean) {
         const db = DatabaseManager.getInstance();
         return db
