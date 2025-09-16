@@ -10,6 +10,7 @@ import "express-async-errors";
 import { authMiddleware } from "../middleware/auth.middelware";
 import { postIsMusicReviewRequestHandler, postNERReviewRequestHandler } from "../controllers/review.controller";
 import { getVideosController } from "../controllers/video.controller";
+import { getUserController } from "../controllers/user.controller";
 
 export function setupAPIRoutes() {
     const app = express();
@@ -27,6 +28,7 @@ export function setupAPIRoutes() {
     app.post("/auth", authRequestHandler)
     app.post("/review/music", authMiddleware, postIsMusicReviewRequestHandler)
     app.post("/review/ner", authMiddleware, postNERReviewRequestHandler)
+    app.get("/user/:handle", getUserController)
     app.get("/videos", getVideosController);
 
     app.use(processErrorMiddleware);
