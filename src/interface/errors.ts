@@ -1,14 +1,6 @@
-export class ExpectedError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class ExpectedError extends Error { }
 
-export class ServerError extends ExpectedError {
-  constructor(message: string) {
-    super(message);
-  }
-}
+export class ServerError extends ExpectedError { }
 
 export class ClientError extends ExpectedError {
   httpCode: number;

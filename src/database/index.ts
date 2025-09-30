@@ -1,27 +1,29 @@
-import { Kysely, PostgresDialect, sql } from "kysely";
-import { DB } from "../model/db";
+import { Kysely, PostgresDialect } from "kysely";
 import { Pool } from "pg";
+import type { DB } from "../model/db";
 import { logger } from "../utils/logger";
 
 export class DatabaseManager {
   private static _db: Kysely<DB> | null = null;
 
   public static getInstance(): Kysely<DB> {
-    if (!this._db) {
+    if (!DatabaseManager._db) {
       throw new Error("DatabaseManager not initialized. Call initialize() first.");
     }
-    return this._db;
+    return DatabaseManager._db;
   }
 
   public static async initialize(): Promise<void> {
-    if (this._db) return;
+    if (DatabaseManager._db) return;
 
-    this._db = new Kysely<DB>({
+    DatabaseManager._db = new Kysely<DB>({
       log(event) {
         if (event.level === "error") {
           logger.error(event.error);
         } else if (event.level === "query") {
-          logger.debug(`SQL: ${event.query.sql} -- ${event.query.parameters} (${event.queryDurationMillis.toFixed(2)}ms)`);
+          logger.debug(
+            `SQL: ${event.query.sql} -- ${event.query.parameters} (${event.queryDurationMillis.toFixed(2)}ms)`,
+          );
         }
       },
       dialect: new PostgresDialect({
@@ -30,22 +32,17 @@ export class DatabaseManager {
         }),
       }),
     });
-    await this.testConnection();
+    await DatabaseManager.testConnection();
   }
 
   private static async testConnection(): Promise<void> {
-    try {
-      await this._db!.selectFrom('posttop.video').select([]).limit(1).execute();
-    } catch (error) {
-      throw error;
-    }
+    await DatabaseManager._db?.selectFrom("posttop.video").select([]).limit(1).execute();
   }
 
-
   public static async close(): Promise<void> {
-    if (this._db) {
-      await this._db.destroy();
-      this._db = null;
+    if (DatabaseManager._db) {
+      await DatabaseManager._db.destroy();
+      DatabaseManager._db = null;
     }
   }
 }

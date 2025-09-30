@@ -20,7 +20,7 @@ class ValidatorMonad {
   // Type Check
   number(error: string) {
     if (typeof this.value === "number") return this;
-    if (!isNaN(this.value)) {
+    if (!Number.isNaN(this.value)) {
       this.value = Number(this.value);
       return this;
     }
@@ -43,7 +43,7 @@ class ValidatorMonad {
   }
 
   date(error: string) {
-    if (new Date(this.value).toDateString() != "Invalid Date") return this;
+    if (new Date(this.value).toDateString() !== "Invalid Date") return this;
     throw new InvalidArgumentError(error);
   }
 

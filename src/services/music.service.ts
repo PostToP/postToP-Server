@@ -3,7 +3,6 @@ import { VideoQueries } from "../database/queries/video.queries";
 import { IsMusicAiService } from "./ai.service";
 import { VideoService } from "./video.service";
 
-
 export class MusicService {
   static async recordListened(watchID: string, userID: number) {
     const videoID = await VideoService.getOrFetch(watchID);
@@ -22,12 +21,12 @@ export class MusicService {
       return {
         is_music: is_music_admin.is_music,
         reviewed: true,
-      }
+      };
     }
     const is_music_ai = await IsMusicAiService.getOrFetch(db_id);
     return {
       is_music: is_music_ai,
       reviewed: false,
-    }
+    };
   }
 }
