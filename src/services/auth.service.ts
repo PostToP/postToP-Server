@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { UserQueries } from "../database/queries/user.queries";
-import { InvalidUserError } from "../interface/errors";
+import {UserQueries} from "../database/queries/user.queries";
+import {InvalidUserError} from "../interface/errors";
 
 const jwtToken = process.env.JWT_TOKEN ?? "";
 
@@ -11,7 +11,7 @@ export class AuthService {
       throw new InvalidUserError("Invalid username or password");
     }
     const user = await UserQueries.fetchBy(username, "username");
-    const token = jwt.sign({ userId: user?.id }, jwtToken, { expiresIn: "90d" });
+    const token = jwt.sign({userId: user?.id}, jwtToken, {expiresIn: "90d"});
     return token;
   }
 

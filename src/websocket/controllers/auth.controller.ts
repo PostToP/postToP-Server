@@ -1,6 +1,6 @@
-import { type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
-import { AuthService } from "../../services/auth.service";
-import { logger } from "../../utils/logger";
+import {type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase} from "../../interface/websocket";
+import {AuthService} from "../../services/auth.service";
+import {logger} from "../../utils/logger";
 
 export function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
   clearTimeout(ws.disconnectTimeout);
@@ -9,7 +9,7 @@ export function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any)
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "Authentication failed" },
+        d: {message: "Authentication failed"},
       }),
     );
     ws.close();
@@ -22,7 +22,7 @@ export function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any)
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.AUTHENTICATED,
-      d: { message: "Authenticated successfully" },
+      d: {message: "Authenticated successfully"},
     }),
   );
   logger.info(`User ${ws.userId} authenticated successfully`);

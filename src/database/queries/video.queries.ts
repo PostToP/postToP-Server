@@ -1,6 +1,6 @@
-import { sql, type Transaction } from "kysely";
-import type { DB } from "../../model/db";
-import { DatabaseManager } from "..";
+import {sql, type Transaction} from "kysely";
+import type {DB} from "../../model/db";
+import {DatabaseManager} from "..";
 
 export interface QueryForAllParams {
   limit?: number;
@@ -78,7 +78,7 @@ export class VideoQueries {
   static async insertMetadata(trx: Transaction<DB>, id: string, language: string, title: string, description: string) {
     return trx
       .insertInto("posttop.video_metadata")
-      .values({ video_id: id, language, title, description })
+      .values({video_id: id, language, title, description})
       .onConflict(oc => oc.doNothing())
       .execute();
   }
@@ -243,7 +243,7 @@ export class VideoQueries {
     videoID: string,
     userID: number,
     language: any,
-    namedEntities: { NER: string; text: string; start: number; end: number }[],
+    namedEntities: {NER: string; text: string; start: number; end: number}[],
   ) {
     console.log("Inserting NER review", videoID, userID, language, JSON.stringify(namedEntities));
     const db = DatabaseManager.getInstance();

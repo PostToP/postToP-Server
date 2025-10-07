@@ -1,4 +1,4 @@
-import { VideoQueries } from "../../database/queries/video.queries";
+import {VideoQueries} from "../../database/queries/video.queries";
 import {
   type ExtendedWebSocketConnection,
   type ListeingData,
@@ -7,17 +7,17 @@ import {
   type VideoResponseData,
   VideoStatus,
 } from "../../interface/websocket";
-import { MusicService } from "../../services/music.service";
-import { VideoService } from "../../services/video.service";
-import { logger } from "../../utils/logger";
-import { announceSongToEvedroppers } from "./misc.controller";
+import {MusicService} from "../../services/music.service";
+import {VideoService} from "../../services/video.service";
+import {logger} from "../../utils/logger";
+import {announceSongToEvedroppers} from "./misc.controller";
 
 export function videoUpdateWebsocketHandler(ws: ExtendedWebSocketConnection, data: VideoRequestData) {
   if (!ws.authenticated || ws.userId === undefined) {
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "User not authenticated" },
+        d: {message: "User not authenticated"},
       }),
     );
     logger.error(`User ${ws.userId} attempted to update video without authentication`);
@@ -40,7 +40,7 @@ export function videoUpdateWebsocketHandler(ws: ExtendedWebSocketConnection, dat
       ws.send(
         JSON.stringify({
           op: ResponseOperationType.ERROR,
-          d: { message: "Invalid video status" },
+          d: {message: "Invalid video status"},
         }),
       );
       logger.error(`User ${ws.userId} sent invalid video status: ${videoStatus}`);
@@ -61,7 +61,7 @@ async function listenedToMusicWebsocketHandler(ws: ExtendedWebSocketConnection, 
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.VIDEO_UPDATE,
-      d: { message: "Music listened successfully" },
+      d: {message: "Music listened successfully"},
     }),
   );
   logger.info(`User ${ws.userId} listened to music successfully`);
@@ -72,7 +72,7 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "Invalid watchID" },
+        d: {message: "Invalid watchID"},
       }),
     );
     logger.error(`User ${ws.userId} sent invalid watchID`);

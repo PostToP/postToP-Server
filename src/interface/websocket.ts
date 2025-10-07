@@ -1,4 +1,4 @@
-import type { WebSocket } from "ws";
+import type {WebSocket} from "ws";
 
 export enum RequestOperationType {
   AUTH = 1,
@@ -40,7 +40,7 @@ export interface ExtendedWebSocketConnection extends WebSocket {
 }
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation> Using Object type for WebsocketData to allow extension </explanation>
-interface WebsocketData extends Object { }
+interface WebsocketData extends Object {}
 
 export interface VideoRequestData extends WebsocketData {
   watchID: string;

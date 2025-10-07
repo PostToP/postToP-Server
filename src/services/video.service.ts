@@ -1,9 +1,9 @@
-import { DatabaseManager } from "../database";
-import { ArtistQueries } from "../database/queries/artist.queries";
-import { CategoryQueries } from "../database/queries/genre.queries";
-import { type QueryForAllParams, VideoQueries } from "../database/queries/video.queries";
-import type { YouTubeApiResponse } from "../interface/youtube";
-import { YouTubeService } from "./youtube.service";
+import {DatabaseManager} from "../database";
+import {ArtistQueries} from "../database/queries/artist.queries";
+import {CategoryQueries} from "../database/queries/genre.queries";
+import {type QueryForAllParams, VideoQueries} from "../database/queries/video.queries";
+import type {YouTubeApiResponse} from "../interface/youtube";
+import {YouTubeService} from "./youtube.service";
 
 export class VideoService {
   static async getOrFetch(watchID: string) {

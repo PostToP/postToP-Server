@@ -1,15 +1,15 @@
-import { WebSocket } from "ws";
-import { UserQueries } from "../../database/queries/user.queries";
-import { type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
-import { logger } from "../../utils/logger";
-import { wssServer } from "..";
+import {WebSocket} from "ws";
+import {UserQueries} from "../../database/queries/user.queries";
+import {type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase} from "../../interface/websocket";
+import {logger} from "../../utils/logger";
+import {wssServer} from "..";
 
 export function heartbeatWebsocketHandler(ws: ExtendedWebSocketConnection, _data: any) {
   if (!ws.authenticated || ws.userId === undefined) {
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "User not authenticated" },
+        d: {message: "User not authenticated"},
       }),
     );
     return;
@@ -50,7 +50,7 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "User not found" },
+        d: {message: "User not found"},
       }),
     );
     logger.error(`Eavesdrop attempt failed for handle ${data.handle}: User not found`);
@@ -62,7 +62,7 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.EAVESDROPPED,
-      d: { message: "Eavesdropping started" },
+      d: {message: "Eavesdropping started"},
     }),
   );
   //TODO: get currently playing music from eavesdroppee, needs redis server or jank dictionary

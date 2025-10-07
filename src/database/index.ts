@@ -1,7 +1,7 @@
-import { Kysely, PostgresDialect } from "kysely";
-import { Pool } from "pg";
-import type { DB } from "../model/db";
-import { logger } from "../utils/logger";
+import {Kysely, PostgresDialect} from "kysely";
+import {Pool} from "pg";
+import type {DB} from "../model/db";
+import {logger} from "../utils/logger";
 
 export class DatabaseManager {
   private static _db: Kysely<DB> | null = null;

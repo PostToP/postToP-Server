@@ -2,10 +2,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import { setupAPIRoutes } from "./api/routes";
-import { DatabaseManager } from "./database";
-import { logger } from "./utils/logger";
-import { addWebsocketUpgradeHandler, setupWebSocketServer } from "./websocket";
+import {setupAPIRoutes} from "./api/routes";
+import {DatabaseManager} from "./database";
+import {logger} from "./utils/logger";
+import {addWebsocketUpgradeHandler, setupWebSocketServer} from "./websocket";
 
 process.stdin.resume();
 
@@ -49,10 +49,10 @@ async function startServer(port: number) {
         reason:
           reason instanceof Error
             ? {
-              message: reason.message,
-              stack: reason.stack,
-              name: reason.name,
-            }
+                message: reason.message,
+                stack: reason.stack,
+                name: reason.name,
+              }
             : reason,
         promise: promise,
       },

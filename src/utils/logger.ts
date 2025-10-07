@@ -7,7 +7,7 @@ export const logger = pino({
   },
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {
-    level: label => ({ level: label }),
+    level: label => ({level: label}),
   },
   serializers: {
     err: pino.stdSerializers.err,

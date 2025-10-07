@@ -1,5 +1,5 @@
-import type { IncomingMessage, Server } from "node:http";
-import { type RawData, type WebSocket, WebSocketServer } from "ws";
+import type {IncomingMessage, Server} from "node:http";
+import {type RawData, type WebSocket, WebSocketServer} from "ws";
 import {
   type ExtendedWebSocketConnection,
   RequestOperationType,
@@ -7,15 +7,15 @@ import {
   WebSocketPhase,
   type WebSocketRequest,
 } from "../interface/websocket";
-import { logger } from "../utils/logger";
-import { authWebsocketHandler } from "./controllers/auth.controller";
-import { eavesdropWebsocketHandler, heartbeatWebsocketHandler } from "./controllers/misc.controller";
-import { videoUpdateWebsocketHandler } from "./controllers/music.controller";
+import {logger} from "../utils/logger";
+import {authWebsocketHandler} from "./controllers/auth.controller";
+import {eavesdropWebsocketHandler, heartbeatWebsocketHandler} from "./controllers/misc.controller";
+import {videoUpdateWebsocketHandler} from "./controllers/music.controller";
 
 export let wssServer: WebSocketServer;
 
 export function setupWebSocketServer() {
-  const wss = new WebSocketServer({ noServer: true });
+  const wss = new WebSocketServer({noServer: true});
   wssServer = wss;
   wss.on("connection", websocketConnectionHandler);
   return wss;
@@ -34,7 +34,7 @@ function websocketConnectionHandler(ws: ExtendedWebSocketConnection, _req: Incom
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "Connection timed out, please try again" },
+        d: {message: "Connection timed out, please try again"},
       }),
     );
     ws.close();
@@ -73,7 +73,7 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "Unknown operation" },
+        d: {message: "Unknown operation"},
       }),
     );
     return;
@@ -85,7 +85,7 @@ async function webSocketMessageHandler(ws: ExtendedWebSocketConnection, message:
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "An error occurred while processing your request" },
+        d: {message: "An error occurred while processing your request"},
       }),
     );
   }

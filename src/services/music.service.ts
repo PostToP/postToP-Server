@@ -1,7 +1,7 @@
-import { MusicQueries } from "../database/queries/music.queries";
-import { VideoQueries } from "../database/queries/video.queries";
-import { IsMusicAiService } from "./ai.service";
-import { VideoService } from "./video.service";
+import {MusicQueries} from "../database/queries/music.queries";
+import {VideoQueries} from "../database/queries/video.queries";
+import {IsMusicAiService} from "./ai.service";
+import {VideoService} from "./video.service";
 
 export class MusicService {
   static async recordListened(watchID: string, userID: number) {

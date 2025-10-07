@@ -1,6 +1,6 @@
-export class ExpectedError extends Error { }
+export class ExpectedError extends Error {}
 
-export class ServerError extends ExpectedError { }
+export class ServerError extends ExpectedError {}
 
 export class ClientError extends ExpectedError {
   httpCode: number;

@@ -1,5 +1,5 @@
-import type { NextFunction, Request, Response } from "express";
-import { logger } from "../../utils/logger";
+import type {NextFunction, Request, Response} from "express";
+import {logger} from "../../utils/logger";
 
 export function logRequestMiddleware(req: Request, res: Response, next: NextFunction) {
   const start = Date.now();

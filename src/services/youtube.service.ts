@@ -1,4 +1,4 @@
-import type { YouTubeApiResponse } from "../interface/youtube";
+import type {YouTubeApiResponse} from "../interface/youtube";
 
 const YT_API_BASE_URL = "https://youtube.googleapis.com/youtube/v3";
 

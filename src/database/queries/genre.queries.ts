@@ -1,5 +1,5 @@
-import type { Transaction } from "kysely";
-import type { DB } from "../../model/db";
+import type {Transaction} from "kysely";
+import type {DB} from "../../model/db";
 
 export class CategoryQueries {
   static async insertToVideo(trx: Transaction<DB>, videoID: string, genres: number[]) {
@@ -30,7 +30,7 @@ export class CategoryQueries {
 
     return trx
       .insertInto("posttop.category")
-      .values(categories.map(category => ({ name: category })))
+      .values(categories.map(category => ({name: category})))
       .onConflict(oc => oc.doNothing())
       .returning("id")
       .execute();

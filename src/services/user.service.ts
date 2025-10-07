@@ -1,5 +1,5 @@
-import { UserQueries } from "../database/queries/user.queries";
-import { InvalidUserError } from "../interface/errors";
+import {UserQueries} from "../database/queries/user.queries";
+import {InvalidUserError} from "../interface/errors";
 
 export class UserService {
   // static async getWeeklyTopStats(userHandle: string) {

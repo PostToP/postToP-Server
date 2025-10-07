@@ -1,5 +1,5 @@
-import { UserQueries } from "../database/queries/user.queries";
-import { VideoQueries } from "../database/queries/video.queries";
+import {UserQueries} from "../database/queries/user.queries";
+import {VideoQueries} from "../database/queries/video.queries";
 
 const AI_MODEL_URL = process.env.AI_MODEL_URL;
 

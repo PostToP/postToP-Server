@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
-import { UnathorizedError } from "../../interface/errors";
-import { AuthService } from "../../services/auth.service";
+import type {Request, Response} from "express";
+import {UnathorizedError} from "../../interface/errors";
+import {AuthService} from "../../services/auth.service";
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation> Using Function type for next to match express types </explanation>
 export function authMiddleware(req: Request, _res: Response, next: Function) {

@@ -1,16 +1,16 @@
-import { json, urlencoded } from "body-parser";
+import {json, urlencoded} from "body-parser";
 import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "../../utils/swagger";
-import { authRequestHandler } from "../controllers/auth.controller";
-import { processErrorMiddleware } from "../middleware/error.middleware";
-import { logRequestMiddleware } from "../middleware/logger.middleware";
+import {swaggerSpec} from "../../utils/swagger";
+import {authRequestHandler} from "../controllers/auth.controller";
+import {processErrorMiddleware} from "../middleware/error.middleware";
+import {logRequestMiddleware} from "../middleware/logger.middleware";
 import "express-async-errors";
-import { postIsMusicReviewRequestHandler, postNERReviewRequestHandler } from "../controllers/review.controller";
-import { getUserController } from "../controllers/user.controller";
-import { getVideosController } from "../controllers/video.controller";
-import { authMiddleware } from "../middleware/auth.middelware";
+import {postIsMusicReviewRequestHandler, postNERReviewRequestHandler} from "../controllers/review.controller";
+import {getUserController} from "../controllers/user.controller";
+import {getVideosController} from "../controllers/video.controller";
+import {authMiddleware} from "../middleware/auth.middelware";
 
 export function setupAPIRoutes() {
   const app = express();

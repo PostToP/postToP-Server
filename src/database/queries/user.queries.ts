@@ -1,5 +1,5 @@
-import { sql } from "kysely";
-import { DatabaseManager } from "..";
+import {sql} from "kysely";
+import {DatabaseManager} from "..";
 
 type AiVersion = `v${number}.${number}.${number}`;
 

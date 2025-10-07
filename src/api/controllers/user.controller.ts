@@ -1,5 +1,5 @@
-import type { Request, Response } from "express";
-import { UserService } from "../../services/user.service";
+import type {Request, Response} from "express";
+import {UserService} from "../../services/user.service";
 
 export async function getUserController(req: Request, res: Response) {
   const userHandle = req.params.handle;
@@ -9,10 +9,10 @@ export async function getUserController(req: Request, res: Response) {
   const endDate = query.endDate ? new Date(query.endDate as string) : undefined;
 
   if (startDate && Number.isNaN(startDate.getTime())) {
-    return res.status(400).json({ error: "Invalid startDate format" });
+    return res.status(400).json({error: "Invalid startDate format"});
   }
   if (endDate && Number.isNaN(endDate.getTime())) {
-    return res.status(400).json({ error: "Invalid endDate format" });
+    return res.status(400).json({error: "Invalid endDate format"});
   }
 
   switch (type) {
@@ -29,6 +29,6 @@ export async function getUserController(req: Request, res: Response) {
       return res.status(200).json(topGenres);
     }
     default:
-      return res.status(400).json({ error: "Invalid type parameter" });
+      return res.status(400).json({error: "Invalid type parameter"});
   }
 }

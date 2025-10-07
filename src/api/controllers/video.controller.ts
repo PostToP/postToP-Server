@@ -1,5 +1,5 @@
-import type { Request, Response } from "express";
-import { VideoService } from "../../services/video.service";
+import type {Request, Response} from "express";
+import {VideoService} from "../../services/video.service";
 
 export async function getVideosController(req: Request, res: Response) {
   const query = req.query;
@@ -24,10 +24,10 @@ export async function getVideosController(req: Request, res: Response) {
   // TODO validate query parameters
 
   try {
-    const reviews = await VideoService.getAll({ limit, page, sortBy, reverse, filters: { verified, music, hasNER } });
+    const reviews = await VideoService.getAll({limit, page, sortBy, reverse, filters: {verified, music, hasNER}});
     return res.status(200).json(reviews);
   } catch (error) {
     console.error("Error fetching reviews:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({error: "Internal server error"});
   }
 }
