@@ -6,7 +6,7 @@ import {VideoService} from "./video.service";
 
 export class MusicService {
   static async recordListened(watchID: string, userID: number) {
-    const videoID = await VideoService.getOrFetch(watchID);
+    const videoID = await VideoService.getOrFetch(watchID, userID);
 
     if ((await MusicService.getVideoIsMusic(videoID)) == null) {
       return false;

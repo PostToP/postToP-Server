@@ -3,15 +3,17 @@ import {ArtistQueries} from "../database/queries/artist.queries";
 import {CategoryQueries} from "../database/queries/genre.queries";
 import {type QueryForAllParams, VideoQueries} from "../database/queries/video.queries";
 import type {YouTubeApiResponse} from "../interface/youtube";
+import {GoogleService} from "./google.service";
 import {YouTubeService} from "./youtube.service";
 
 export class VideoService {
-  static async getOrFetch(watchID: string) {
+  static async getOrFetch(watchID: string, userID: number) {
     const exists = await VideoQueries.fetch(watchID);
     if (exists) {
       return exists.id;
     }
-    const yt_video_details = await YouTubeService.fetchVideoDetails(watchID);
+    const userAccessToken = await GoogleService.getAccessToken(userID);
+    const yt_video_details = await YouTubeService.fetchVideoDetails(watchID, userAccessToken);
     const ID = await VideoService.addToDatabase(yt_video_details);
     return ID;
   }
