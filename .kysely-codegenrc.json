@@ -1,0 +1,32 @@
+{
+  "camelCase": false,
+  "dateParser": "timestamp",
+  "defaultSchemas": [
+    "posttop"
+  ],
+  "dialect": "postgres",
+  "domains": true,
+  "envFile": ".env",
+  "excludePattern": null,
+  "includePattern": null,
+  "logLevel": "debug",
+  "numericParser": "number",
+  "outFile": "./src/model/db.d.ts",
+  "partitions": false,
+  "print": false,
+  "runtimeEnums": true,
+  "typeOnlyImports": true,
+  "url": "env(DATABASE_URL)",
+  "verify": false,
+  "customImports": {
+    "CategoryID": "./src/model/override"
+  },
+  "overrides": {
+    "columns": {
+      "channel.id": "Generated<ChannelID>",
+      "video.id": "Generated<VideoID>",
+      "video.yt_id": "VideoYTID",
+      "channel.yt_id": "ChannelYTID"
+    }
+  }
+}

@@ -1,10 +1,11 @@
 import {UserQueries} from "../database/queries/user.queries";
 import {VideoQueries} from "../database/queries/video.queries";
+import type {VideoID} from "../model/override";
 
 const AI_MODEL_URL = process.env.AI_MODEL_URL;
 
 export class IsMusicAiService {
-  private static async fetch(videoID: string) {
+  private static async fetch(videoID: VideoID) {
     const data = await VideoQueries.fetchAiData(videoID);
     const body = {
       title: data?.title,
@@ -30,7 +31,7 @@ export class IsMusicAiService {
     };
   }
 
-  static async getOrFetch(videoID: string) {
+  static async getOrFetch(videoID: VideoID) {
     const is_music_ai = await VideoQueries.fetchIsMusicByAI(videoID);
     if (is_music_ai) {
       return is_music_ai.is_music;

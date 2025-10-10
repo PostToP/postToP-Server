@@ -36,7 +36,7 @@ export class DatabaseManager {
   }
 
   private static async testConnection(): Promise<void> {
-    await DatabaseManager._db?.selectFrom("posttop.video").select([]).limit(1).execute();
+    await DatabaseManager._db?.selectFrom("video").select([]).limit(1).execute();
   }
 
   public static async close(): Promise<void> {

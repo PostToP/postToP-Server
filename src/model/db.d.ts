@@ -4,6 +4,7 @@
  */
 
 import type {ColumnType} from "kysely";
+import type {ChannelID, ChannelYTID, VideoID, VideoYTID} from "./override";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -25,92 +26,92 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface PosttopCategory {
+export interface Category {
   id: Generated<number>;
   name: string;
 }
 
-export interface PosttopChannel {
-  id: Generated<number>;
+export interface Channel {
+  id: Generated<ChannelID>;
   name: string;
-  yt_id: string;
+  yt_id: ChannelYTID;
 }
 
-export interface PosttopIsMusicVideo {
+export interface IsMusicVideo {
   created_at: Generated<Timestamp>;
   is_music: boolean;
   submitted_by_id: number;
-  video_id: Int8;
+  video_id: VideoID;
 }
 
-export interface PosttopListened {
+export interface Listened {
   listened_at: Generated<Timestamp>;
   user_id: number;
-  video_id: Int8;
+  video_id: VideoID;
 }
 
-export interface PosttopMainCategory {
+export interface MainCategory {
   id: number;
   name: string;
 }
 
-export interface PosttopNerResult {
+export interface NerResult {
   created_at: Generated<Timestamp>;
   language: string;
   ner_result: Json;
   submitted_by_id: number;
-  video_id: Int8;
+  video_id: VideoID;
 }
 
-export interface PosttopRole {
+export interface Role {
   id: Generated<number>;
   name: string;
 }
 
-export interface PosttopUser {
+export interface User {
   handle: Generated<string>;
   id: Generated<number>;
   password_hash: string;
   username: string;
 }
 
-export interface PosttopUserRole {
+export interface UserRole {
   role_id: number;
   user_id: number;
 }
 
-export interface PosttopVideo {
-  channel_id: number | null;
+export interface Video {
+  channel_id: ChannelID;
   default_language: string;
   duration: number;
-  id: Generated<Int8>;
+  id: Generated<VideoID>;
   main_category_id: number | null;
-  yt_id: string;
+  yt_id: VideoYTID;
 }
 
-export interface PosttopVideoCategory {
+export interface VideoCategory {
   category_id: number;
-  video_id: Int8;
+  video_id: VideoID;
 }
 
-export interface PosttopVideoMetadata {
+export interface VideoMetadata {
   description: string | null;
   language: string;
   title: string;
-  video_id: Int8;
+  video_id: VideoID;
 }
 
 export interface DB {
-  "posttop.category": PosttopCategory;
-  "posttop.channel": PosttopChannel;
-  "posttop.is_music_video": PosttopIsMusicVideo;
-  "posttop.listened": PosttopListened;
-  "posttop.main_category": PosttopMainCategory;
-  "posttop.ner_result": PosttopNerResult;
-  "posttop.role": PosttopRole;
-  "posttop.user": PosttopUser;
-  "posttop.user_role": PosttopUserRole;
-  "posttop.video": PosttopVideo;
-  "posttop.video_category": PosttopVideoCategory;
-  "posttop.video_metadata": PosttopVideoMetadata;
+  category: Category;
+  channel: Channel;
+  is_music_video: IsMusicVideo;
+  listened: Listened;
+  main_category: MainCategory;
+  ner_result: NerResult;
+  role: Role;
+  user: User;
+  user_role: UserRole;
+  video: Video;
+  video_category: VideoCategory;
+  video_metadata: VideoMetadata;
 }
