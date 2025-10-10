@@ -2,9 +2,9 @@ import {type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase}
 import {AuthService} from "../../services/auth.service";
 import {logger} from "../../utils/logger";
 
-export function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
+export async function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
   clearTimeout(ws.disconnectTimeout);
-  const verifiedToken = AuthService.verifyToken(data.token);
+  const verifiedToken = await AuthService.getUserIDFromSession(data.token);
   if (!verifiedToken.ok) {
     ws.send(
       JSON.stringify({

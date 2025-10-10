@@ -4,7 +4,6 @@
  */
 
 import type {ColumnType} from "kysely";
-import type {ChannelID, ChannelYTID, VideoID, VideoYTID} from "./override";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -25,6 +24,22 @@ export type JsonPrimitive = boolean | number | string | null;
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export interface Account {
+  accessToken: string | null;
+  accessTokenExpiresAt: Timestamp | null;
+  accountId: string;
+  createdAt: Generated<Timestamp>;
+  id: string;
+  idToken: string | null;
+  password: string | null;
+  providerId: string;
+  refreshToken: string | null;
+  refreshTokenExpiresAt: Timestamp | null;
+  scope: string | null;
+  updatedAt: Timestamp;
+  userId: string;
+}
 
 export interface Category {
   id: Generated<number>;
@@ -68,16 +83,47 @@ export interface Role {
   name: string;
 }
 
+export interface Session {
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: string;
+  ipAddress: string | null;
+  token: string;
+  updatedAt: Timestamp;
+  userAgent: string | null;
+  userId: string;
+}
+
 export interface User {
-  handle: Generated<string>;
+  better_auth_id: string | null;
+  handle: string | null;
   id: Generated<number>;
-  password_hash: string;
-  username: string;
+  password_hash: string | null;
+  username: string | null;
+}
+
+export interface UserBetterAuth {
+  createdAt: Generated<Timestamp>;
+  email: string;
+  emailVerified: boolean;
+  id: string;
+  image: string | null;
+  name: string;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface UserRole {
   role_id: number;
   user_id: number;
+}
+
+export interface Verification {
+  createdAt: Generated<Timestamp>;
+  expiresAt: Timestamp;
+  id: string;
+  identifier: string;
+  updatedAt: Generated<Timestamp>;
+  value: string;
 }
 
 export interface Video {
@@ -102,6 +148,7 @@ export interface VideoMetadata {
 }
 
 export interface DB {
+  account: Account;
   category: Category;
   channel: Channel;
   is_music_video: IsMusicVideo;
@@ -109,8 +156,11 @@ export interface DB {
   main_category: MainCategory;
   ner_result: NerResult;
   role: Role;
+  session: Session;
   user: User;
+  user_better_auth: UserBetterAuth;
   user_role: UserRole;
+  verification: Verification;
   video: Video;
   video_category: VideoCategory;
   video_metadata: VideoMetadata;

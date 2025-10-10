@@ -10,15 +10,16 @@ export class UserQueries {
     return db.selectFrom("user").selectAll().where(type, "=", identifier).executeTakeFirst();
   }
 
-  static async fetchHash(username: string) {
-    const db = DatabaseManager.getInstance();
-    return db.selectFrom("user").select(["password_hash"]).where("username", "=", username).executeTakeFirst();
-  }
-
   static async fetchAI(version: AiVersion) {
     const modelName = `model@${version}`;
     const db = DatabaseManager.getInstance();
     return db.selectFrom("user").selectAll().where("username", "=", modelName).executeTakeFirst();
+  }
+
+  static async betterAuthIdToUserId(betterAuthId: string) {
+    const db = DatabaseManager.getInstance();
+    const user = await db.selectFrom("user").select("id").where("better_auth_id", "=", betterAuthId).executeTakeFirst();
+    return user?.id;
   }
 
   static async getListenedMusic(userHandle: string) {

@@ -3,29 +3,30 @@ import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import {swaggerSpec} from "../../utils/swagger";
-import {authRequestHandler} from "../controllers/auth.controller";
 import {processErrorMiddleware} from "../middleware/error.middleware";
 import {logRequestMiddleware} from "../middleware/logger.middleware";
 import "express-async-errors";
+import {toNodeHandler} from "better-auth/node";
+import {auth} from "../../auth";
 import {postIsMusicReviewRequestHandler, postNERReviewRequestHandler} from "../controllers/review.controller";
 import {getUserController} from "../controllers/user.controller";
 import {getVideosController} from "../controllers/video.controller";
-import {authMiddleware} from "../middleware/auth.middelware";
+import {authMiddleware} from "../middleware/auth.middleware";
 
 export function setupAPIRoutes() {
   const app = express();
 
+  app.use(cors({origin: "*", credentials: true}));
+  app.all("/api/auth/*", toNodeHandler(auth));
   app.use(
     urlencoded({
       extended: true,
     }),
   );
   app.use(json());
-  app.use(cors());
   app.use(logRequestMiddleware);
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-  app.post("/auth", authRequestHandler);
   app.post("/review/music", authMiddleware, postIsMusicReviewRequestHandler);
   app.post("/review/ner", authMiddleware, postNERReviewRequestHandler);
   app.get("/user/:handle", getUserController);
