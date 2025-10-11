@@ -4,7 +4,7 @@ import {logger} from "../../utils/logger";
 
 export async function authWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
   clearTimeout(ws.disconnectTimeout);
-  const verifiedToken = await AuthService.getUserIDFromSession(data.token);
+  const verifiedToken = await AuthService.getUserIDFromSessionID(data.token);
   if (!verifiedToken.ok) {
     ws.send(
       JSON.stringify({
