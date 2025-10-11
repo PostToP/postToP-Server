@@ -13,10 +13,23 @@ import {getUserController} from "../controllers/user.controller";
 import {getVideosController} from "../controllers/video.controller";
 import {authMiddleware} from "../middleware/auth.middleware";
 
+const allowedOrigins = ["http://localhost:3000", "chrome-extension://*"];
+
 export function setupAPIRoutes() {
   const app = express();
 
-  app.use(cors({origin: "*", credentials: true}));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+    }),
+  );
   app.all("/api/auth/*", toNodeHandler(auth));
   app.use(
     urlencoded({
