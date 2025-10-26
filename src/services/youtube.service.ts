@@ -26,6 +26,29 @@ export class YouTubeService {
     }
   }
 
+  static async fetchArtistChannelDetails(channelId: string, userAccessToken: string): Promise<YouTubeApiResponse> {
+    const baseUrl = `${YT_API_BASE_URL}/channels`;
+    const params = new URLSearchParams({
+      part: "snippet,topicDetails,contentDetails",
+      id: channelId,
+    });
+    const url = `${baseUrl}?${params.toString()}`;
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${userAccessToken}`,
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const data = (await response.json()) as YouTubeApiResponse;
+      return data;
+    } catch (error) {
+      throw new Error(`Failed to fetch YouTube channel details: ${error}`);
+    }
+  }
+
   static convertDetails(details: YouTubeApiResponse) {
     if (!details.items || details.items.length === 0) {
       throw new Error("No video details found");

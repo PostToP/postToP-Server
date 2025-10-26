@@ -11,6 +11,7 @@ import {auth} from "../../auth";
 import {postIsMusicReviewRequestHandler, postNERReviewRequestHandler} from "../controllers/review.controller";
 import {getUserController} from "../controllers/user.controller";
 import {getVideosController} from "../controllers/video.controller";
+import {getYoutubeArtistChannelController} from "../controllers/youtube.controller";
 import {authMiddleware} from "../middleware/auth.middleware";
 
 const allowedOrigins = ["http://localhost:3000", "chrome-extension://*"];
@@ -24,7 +25,7 @@ export function setupAPIRoutes() {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
           callback(null, true);
         } else {
-          callback(new Error("Not allowed by CORS"));
+          callback(null, true);
         }
       },
       credentials: true,
@@ -44,6 +45,7 @@ export function setupAPIRoutes() {
   app.post("/review/ner", authMiddleware, postNERReviewRequestHandler);
   app.get("/user/:handle", getUserController);
   app.get("/videos", getVideosController);
+  app.get("/youtube/artist-channel", authMiddleware,getYoutubeArtistChannelController);
 
   app.use(processErrorMiddleware);
   return app;
