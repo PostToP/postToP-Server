@@ -96,23 +96,33 @@ export class UserQueries {
     return query;
   }
 
-  static async getWeeklyTopMusic(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopMusic(user_id: number, startDate?: Date, endDate?: Date) {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
-      .groupBy(["v.yt_id", "video_metadata.title", "c.name"])
+      .groupBy(["v.yt_id", "video_metadata.title", "c.name", "c.yt_id"])
       .select(eb => [
         eb.ref("v.yt_id").as("video_id"),
-        eb.ref("video_metadata.title").as("title"),
-        eb.ref("c.name").as("artist"),
+        eb.ref("video_metadata.title").as("video_title"),
+        eb.ref("c.name").as("artist_name"),
+        eb.ref("c.yt_id").as("artist_id"),
         db.fn.count("listened.video_id").as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
       .limit(10);
-    return query.execute();
+
+    type TopMusicRow = {
+      video_id: string;
+      video_title: string;
+      artist_name: string;
+      artist_id: string;
+      listen_count: number;
+    };
+
+    return query.execute() as Promise<TopMusicRow[]>;
   }
 
-  static async getWeeklyTopArtists(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopArtists(user_id: number, startDate?: Date, endDate?: Date) {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
@@ -127,7 +137,7 @@ export class UserQueries {
     return query.execute();
   }
 
-  static async getWeeklyTopGenres(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopGenres(user_id: number, startDate?: Date, endDate?: Date) {
     // TODO: with new category system
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);

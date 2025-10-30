@@ -18,18 +18,27 @@ export class UserService {
   static async getTopMusic(userHandle: string, startDate?: Date, endDate?: Date) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    return UserQueries.getWeeklyTopMusic(user.id, startDate, endDate);
+    const rows = await UserQueries.getTopMusic(user.id, startDate, endDate);
+    return rows.map(row => ({
+      yt_id: row.video_id,
+      video_title: row.video_title,
+      listen_count: row.listen_count,
+      channel: {
+        yt_id: row.artist_id,
+        name: row.artist_name,
+      },
+    }));
   }
 
   static async getTopArtists(userHandle: string, startDate?: Date, endDate?: Date) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    return UserQueries.getWeeklyTopArtists(user.id, startDate, endDate);
+    return UserQueries.getTopArtists(user.id, startDate, endDate);
   }
 
   static async getTopGenres(userHandle: string, startDate?: Date, endDate?: Date) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    return UserQueries.getWeeklyTopGenres(user.id, startDate, endDate);
+    return UserQueries.getTopGenres(user.id, startDate, endDate);
   }
 }
