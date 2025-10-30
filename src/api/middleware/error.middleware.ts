@@ -14,5 +14,6 @@ export function processErrorMiddleware(err: Error, _req: Request, res: Response,
     return;
   }
   logger.error("Unexpected error:", {error: err});
+  console.error(err);
   res.status(500).json({message: "Internal Server Error"});
 }

@@ -3,20 +3,16 @@ import type {YouTubeApiResponse} from "../interface/youtube";
 const YT_API_BASE_URL = "https://youtube.googleapis.com/youtube/v3";
 
 export class YouTubeService {
-  static async fetchVideoDetails(videoId: string, userAccessToken: string): Promise<YouTubeApiResponse> {
+  static async fetchVideoDetails(videoId: string): Promise<YouTubeApiResponse> {
     const baseUrl = `${YT_API_BASE_URL}/videos`;
     const params = new URLSearchParams({
       part: "snippet,topicDetails,localizations,contentDetails",
       id: videoId,
+      key: process.env.YT_API_KEY || "",
     });
     const url = `${baseUrl}?${params.toString()}`;
     try {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          Accept: "application/json",
-        },
-      });
+      const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = (await response.json()) as YouTubeApiResponse;
@@ -26,20 +22,16 @@ export class YouTubeService {
     }
   }
 
-  static async fetchArtistChannelDetails(channelId: string, userAccessToken: string): Promise<YouTubeApiResponse> {
+  static async fetchArtistChannelDetails(channelId: string): Promise<YouTubeApiResponse> {
     const baseUrl = `${YT_API_BASE_URL}/channels`;
     const params = new URLSearchParams({
       part: "snippet,topicDetails,contentDetails",
       id: channelId,
+      key: process.env.YT_API_KEY || "",
     });
     const url = `${baseUrl}?${params.toString()}`;
     try {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${userAccessToken}`,
-          Accept: "application/json",
-        },
-      });
+      const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
       const data = (await response.json()) as YouTubeApiResponse;

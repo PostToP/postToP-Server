@@ -3,16 +3,16 @@ import {UnathorizedError} from "../../interface/errors";
 import {AuthService} from "../../services/auth.service";
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation> Using Function type for next to match express types </explanation>
-export async function authMiddleware(req: Request, res: Response, next: Function) {
-  const response = await AuthService.getUserIDFromHeaders(req.headers);
-  if (!response.ok || !response.data) {
-    throw new UnathorizedError("Invalid or missing authentication token");
+export async function authMiddleware(req: Request, _res: Response, next: Function) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    throw new UnathorizedError("Authorization token is missing");
   }
-  const userID = response.data.userId;
-  if (!userID) {
-    throw new UnathorizedError("Invalid or missing authentication token");
+  const decoded = AuthService.verifyToken(token);
+  if (!decoded.ok) {
+    throw new UnathorizedError("Invalid or expired token");
   }
 
-  req.userID = userID;
+  req.userID = decoded.data?.userId;
   next();
 }

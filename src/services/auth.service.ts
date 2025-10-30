@@ -1,45 +1,44 @@
-import {fromNodeHeaders} from "better-auth/node";
-import type {IncomingHttpHeaders} from "http";
-import {auth} from "../auth";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import {UserQueries} from "../database/queries/user.queries";
+import {InvalidUserError} from "../interface/errors";
+
+const jwtToken = process.env.JWT_TOKEN ?? "";
 
 export class AuthService {
-  static async getUserIDFromSessionID(session: string) {
-    const sessionResponse = await auth.api.getSession({
-      headers: {
-        Authorization: `Bearer ${session}`,
-      },
-    });
+  static async auth(username: string, password: string) {
+    if (!(await AuthService.isValid(username, password))) {
+      throw new InvalidUserError("Invalid username or password");
+    }
+    const user = await UserQueries.fetchBy(username, "username");
+    const token = jwt.sign({userId: user?.id}, jwtToken, {expiresIn: "90d"});
+    return token;
+  }
 
-    if (!sessionResponse)
+  private static async isValid(username: string, password: string) {
+    const user = await UserQueries.fetchHash(username);
+    if (!user) {
+      return false;
+    }
+
+    return bcrypt.compareSync(password, user.password_hash);
+  }
+  static verifyToken(token: string) {
+    try {
+      const decoded = jwt.verify(token, jwtToken);
+      return {
+        ok: true,
+        data: decoded as DecodedToken,
+      };
+    } catch (_error) {
       return {
         ok: false,
         data: null,
       };
-    const userID = UserQueries.betterAuthIdToUserId(sessionResponse.user?.id as string);
-    return {
-      ok: true,
-      data: {
-        userId: await userID,
-      },
-    };
+    }
   }
+}
 
-  static async getUserIDFromHeaders(headers: IncomingHttpHeaders) {
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(headers),
-    });
-    if (!session)
-      return {
-        ok: false,
-        data: null,
-      };
-    const userID = UserQueries.betterAuthIdToUserId(session.user?.id as string);
-    return {
-      ok: true,
-      data: {
-        userId: await userID,
-      },
-    };
-  }
+interface DecodedToken {
+  userId: number;
 }

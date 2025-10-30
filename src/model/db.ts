@@ -32,22 +32,6 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
-export interface Account {
-  accessToken: string | null;
-  accessTokenExpiresAt: Timestamp | null;
-  accountId: string;
-  createdAt: Generated<Timestamp>;
-  id: string;
-  idToken: string | null;
-  password: string | null;
-  providerId: string;
-  refreshToken: string | null;
-  refreshTokenExpiresAt: Timestamp | null;
-  scope: string | null;
-  updatedAt: Timestamp;
-  userId: string;
-}
-
 export interface Category {
   id: Generated<number>;
   name: string;
@@ -103,47 +87,16 @@ export interface Role {
   name: string;
 }
 
-export interface Session {
-  createdAt: Generated<Timestamp>;
-  expiresAt: Timestamp;
-  id: string;
-  ipAddress: string | null;
-  token: string;
-  updatedAt: Timestamp;
-  userAgent: string | null;
-  userId: string;
-}
-
 export interface User {
-  better_auth_id: string | null;
-  handle: string | null;
+  handle: Generated<string>;
   id: Generated<number>;
-  password_hash: string | null;
-  username: string | null;
-}
-
-export interface UserBetterAuth {
-  createdAt: Generated<Timestamp>;
-  email: string;
-  emailVerified: boolean;
-  id: string;
-  image: string | null;
-  name: string;
-  updatedAt: Generated<Timestamp>;
+  password_hash: string;
+  username: string;
 }
 
 export interface UserRole {
   role_id: number;
   user_id: number;
-}
-
-export interface Verification {
-  createdAt: Generated<Timestamp>;
-  expiresAt: Timestamp;
-  id: string;
-  identifier: string;
-  updatedAt: Generated<Timestamp>;
-  value: string;
 }
 
 export interface Video {
@@ -168,7 +121,6 @@ export interface VideoMetadata {
 }
 
 export interface DB {
-  account: Account;
   category: Category;
   channel: Channel;
   is_music_video: IsMusicVideo;
@@ -178,11 +130,8 @@ export interface DB {
   model: Model;
   ner_result: NerResult;
   role: Role;
-  session: Session;
   user: User;
-  user_better_auth: UserBetterAuth;
   user_role: UserRole;
-  verification: Verification;
   video: Video;
   video_category: VideoCategory;
   video_metadata: VideoMetadata;

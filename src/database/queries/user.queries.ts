@@ -19,43 +19,9 @@ export class UserQueries {
       .executeTakeFirst();
   }
 
-  static async betterAuthIdToUserId(betterAuthId: string) {
+  static async fetchHash(username: string) {
     const db = DatabaseManager.getInstance();
-    const user = await db.selectFrom("user").select("id").where("better_auth_id", "=", betterAuthId).executeTakeFirst();
-    return user?.id;
-  }
-
-  static async getUsersYTTokens(userID: number) {
-    const db = DatabaseManager.getInstance();
-    const res = await db
-      .selectFrom("user")
-      .innerJoin("user_better_auth", "user.better_auth_id", "user_better_auth.id")
-      .innerJoin("account", "user_better_auth.id", "account.userId")
-      .where("user.id", "=", userID)
-      .select(["accessToken", "refreshToken", "accessTokenExpiresAt", "refreshTokenExpiresAt"])
-      .limit(1)
-      .execute();
-
-    return res[0];
-  }
-
-  static async updateUserAccessToken(userID: number, newAccessToken: string, newExpiryDate: Date) {
-    const db = DatabaseManager.getInstance();
-    await db
-      .updateTable("account")
-      .set({
-        accessToken: newAccessToken,
-        accessTokenExpiresAt: newExpiryDate,
-      })
-      .where(
-        "userId",
-        "=",
-        db
-          .selectFrom("user_better_auth")
-          .select("id")
-          .where("id", "=", db.selectFrom("user").select("better_auth_id").where("id", "=", userID)),
-      )
-      .execute();
+    return db.selectFrom("user").select(["password_hash"]).where("username", "=", username).executeTakeFirst();
   }
 
   static async getListenedMusic(userHandle: string) {

@@ -56,7 +56,7 @@ async function listenedToMusicWebsocketHandler(ws: ExtendedWebSocketConnection, 
         d: {message: "User not authenticated"},
       }),
     );
-  const videoID = await VideoService.getOrFetch(data.watchID, ws.userId);
+  const videoID = await VideoService.getOrFetch(data.watchID);
   const isMusic = await MusicService.getVideoIsMusic(videoID);
   if (!isMusic.is_music) return;
   if (ws.userId === undefined) {
@@ -95,7 +95,7 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     );
     return;
   }
-  const videoID = await VideoService.getOrFetch(data.watchID, ws.userId);
+  const videoID = await VideoService.getOrFetch(data.watchID);
   const isMusic = await MusicService.getVideoIsMusic(videoID);
   const videoData = await VideoQueries.fetchDataAll(videoID);
 
