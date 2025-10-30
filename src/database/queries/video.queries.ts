@@ -105,7 +105,7 @@ export class VideoQueries {
   static async fetchIsMusicByAI(videoID: VideoID) {
     const db = DatabaseManager.getInstance();
     return db
-      .selectFrom("is_music_video")
+      .selectFrom("is_music_video_prediction")
       .where("video_id", "=", videoID)
       .where(
         "submitted_by_id",
@@ -120,13 +120,26 @@ export class VideoQueries {
       .executeTakeFirst();
   }
 
-  static async insertIsMusic(videoID: VideoID, userID: number, is_music: boolean) {
+  static async insertIsMusicByUser(videoID: VideoID, userID: number, is_music: boolean) {
     const db = DatabaseManager.getInstance();
     return db
       .insertInto("is_music_video")
       .values({
         video_id: videoID,
         submitted_by_id: userID,
+        is_music: is_music,
+      })
+      .onConflict(oc => oc.doNothing())
+      .execute();
+  }
+
+  static async insertIsMusicByAI(videoID: VideoID, modelID: number, is_music: boolean) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .insertInto("is_music_video_prediction")
+      .values({
+        video_id: videoID,
+        submitted_by_id: modelID,
         is_music: is_music,
       })
       .onConflict(oc => oc.doNothing())
@@ -161,6 +174,7 @@ export class VideoQueries {
           .onRef("video.default_language", "=", "video_metadata.language"),
       )
       .leftJoin("is_music_video", "video.id", "is_music_video.video_id")
+      .leftJoin("is_music_video_prediction", "video.id", "is_music_video_prediction.video_id")
       .innerJoin(db.selectFrom("channel").select(["id", "name"]).as("channel"), "video.channel_id", "channel.id");
 
     if (params.sortBy) {

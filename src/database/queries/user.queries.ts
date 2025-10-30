@@ -1,7 +1,6 @@
 import {sql} from "kysely";
+import type {ModelType} from "../../model/db";
 import {DatabaseManager} from "..";
-
-type AiVersion = `v${number}.${number}.${number}`;
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id") {
@@ -10,10 +9,14 @@ export class UserQueries {
     return db.selectFrom("user").selectAll().where(type, "=", identifier).executeTakeFirst();
   }
 
-  static async fetchAI(version: AiVersion) {
-    const modelName = `model@${version}`;
+  static async fetchAI(type: ModelType, version: string) {
     const db = DatabaseManager.getInstance();
-    return db.selectFrom("user").selectAll().where("username", "=", modelName).executeTakeFirst();
+    return db
+      .selectFrom("model")
+      .selectAll()
+      .where("type", "=", type)
+      .where("version", "=", version)
+      .executeTakeFirst();
   }
 
   static async betterAuthIdToUserId(betterAuthId: string) {

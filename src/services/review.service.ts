@@ -6,7 +6,7 @@ export class ReviewService {
     if (!db_id) {
       throw new Error("Video not found");
     }
-    const review = await VideoQueries.insertIsMusic(db_id.id, userID, is_music);
+    const review = await VideoQueries.insertIsMusicByUser(db_id.id, userID, is_music);
     return review;
   }
 

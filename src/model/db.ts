@@ -4,6 +4,13 @@
  */
 
 import type {ColumnType} from "kysely";
+import type {ChannelID, ChannelYTID, VideoID, VideoYTID} from "./override";
+
+export enum ModelType {
+  GENRE_CLASSIFIER = "genre_classifier",
+  IS_MUSIC_CLASSIFIER = "is_music_classifier",
+  NER = "ner",
+}
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
@@ -59,6 +66,13 @@ export interface IsMusicVideo {
   video_id: VideoID;
 }
 
+export interface IsMusicVideoPrediction {
+  created_at: Generated<Timestamp>;
+  is_music: boolean;
+  submitted_by_id: number;
+  video_id: VideoID;
+}
+
 export interface Listened {
   listened_at: Generated<Timestamp>;
   user_id: number;
@@ -68,6 +82,12 @@ export interface Listened {
 export interface MainCategory {
   id: number;
   name: string;
+}
+
+export interface Model {
+  id: Generated<number>;
+  type: ModelType;
+  version: string;
 }
 
 export interface NerResult {
@@ -152,8 +172,10 @@ export interface DB {
   category: Category;
   channel: Channel;
   is_music_video: IsMusicVideo;
+  is_music_video_prediction: IsMusicVideoPrediction;
   listened: Listened;
   main_category: MainCategory;
+  model: Model;
   ner_result: NerResult;
   role: Role;
   session: Session;

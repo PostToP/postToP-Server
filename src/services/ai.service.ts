@@ -1,5 +1,6 @@
 import {UserQueries} from "../database/queries/user.queries";
 import {VideoQueries} from "../database/queries/video.queries";
+import {ModelType} from "../model/db";
 import type {VideoID} from "../model/override";
 
 const AI_MODEL_URL = process.env.AI_MODEL_URL;
@@ -25,9 +26,10 @@ export class IsMusicAiService {
     });
 
     const result = await analysis.json();
+    result.version = result.version.startsWith("v") ? result.version.slice(1) : result.version;
     return result as {
       prediction: number;
-      version: `v${number}.${number}.${number}`;
+      version: string;
     };
   }
 
@@ -38,11 +40,11 @@ export class IsMusicAiService {
     }
     const currentResponse = await IsMusicAiService.fetch(videoID);
     const is_music = currentResponse.prediction >= 0.5;
-    const aiUserID = await UserQueries.fetchAI(currentResponse.version);
+    const aiUserID = await UserQueries.fetchAI(ModelType.IS_MUSIC_CLASSIFIER, currentResponse.version);
     if (!aiUserID) {
       throw new Error("AI user not found");
     }
-    await VideoQueries.insertIsMusic(videoID, aiUserID?.id, is_music);
+    await VideoQueries.insertIsMusicByAI(videoID, aiUserID?.id, is_music);
     return is_music;
   }
 }
