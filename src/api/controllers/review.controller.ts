@@ -1,6 +1,7 @@
 import type {Request, Response} from "express";
 import {z} from "zod";
 import {ReviewService} from "../../services/review.service";
+import type {AuthenticatedRequest} from "../../types/express";
 
 const IsMusicReviewSchema = z.object({
   watchID: z.string().min(1),
@@ -8,7 +9,8 @@ const IsMusicReviewSchema = z.object({
 });
 
 export async function postIsMusicReviewRequestHandler(req: Request, res: Response) {
-  const userID = req.userID!;
+  const userReq = req as AuthenticatedRequest;
+  const userID = userReq.userID;
   const {watchID, is_music} = IsMusicReviewSchema.parse(req.body);
 
   await ReviewService.addIsMusicReview(watchID, userID, is_music);
@@ -29,10 +31,8 @@ const NERReviewSchema = z.object({
 });
 
 export async function postNERReviewRequestHandler(req: Request, res: Response) {
-  const userID = req.userID;
-  if (!userID) {
-    return res.status(401).json({error: "Unauthorized"});
-  }
+  const userReq = req as AuthenticatedRequest;
+  const userID = userReq.userID;
 
   const {watchID, language, namedEntities} = NERReviewSchema.parse(req.body);
 

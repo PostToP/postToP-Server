@@ -1,10 +1,5 @@
-// biome-ignore lint/correctness/noUnusedImports: <explanation> Importing to extend express Request type </explanation>
-import {Request} from "express";
+import type {Request} from "express";
 
-declare global {
-  namespace Express {
-    interface Request {
-      userID?: number;
-    }
-  }
+interface AuthenticatedRequest extends Request {
+  userID: number;
 }

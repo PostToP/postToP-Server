@@ -23,7 +23,8 @@ export class AuthService {
 
     return bcrypt.compareSync(password, user.password_hash);
   }
-  static verifyToken(token: string) {
+
+  static verifyToken(token: string): VerifyTokenResult {
     try {
       const decoded = jwt.verify(token, jwtToken);
       return {
@@ -38,6 +39,18 @@ export class AuthService {
     }
   }
 }
+
+type ok = {
+  ok: true;
+  data: DecodedToken;
+};
+
+type notOk = {
+  ok: false;
+  data: null;
+};
+
+export type VerifyTokenResult = ok | notOk;
 
 interface DecodedToken {
   userId: number;
