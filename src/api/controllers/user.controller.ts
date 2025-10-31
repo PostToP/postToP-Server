@@ -1,19 +1,16 @@
 import type {Request, Response} from "express";
+import {z} from "zod";
 import {UserService} from "../../services/user.service";
+
+const QuerySchema = z.object({
+  type: z.enum(["music", "artist", "genre"]),
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
 
 export async function getUserController(req: Request, res: Response) {
   const userHandle = req.params.handle;
-  const query = req.query;
-  const type = query.type as "music" | "artist" | "genre";
-  const startDate = query.startDate ? new Date(query.startDate as string) : undefined;
-  const endDate = query.endDate ? new Date(query.endDate as string) : undefined;
-
-  if (startDate && Number.isNaN(startDate.getTime())) {
-    return res.status(400).json({error: "Invalid startDate format"});
-  }
-  if (endDate && Number.isNaN(endDate.getTime())) {
-    return res.status(400).json({error: "Invalid endDate format"});
-  }
+  const {type, startDate, endDate} = QuerySchema.parse(req.query);
 
   switch (type) {
     case "music": {
