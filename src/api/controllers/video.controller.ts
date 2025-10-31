@@ -15,11 +15,6 @@ export const GetVideosQuerySchema = z.object({
 export async function getVideosController(req: Request, res: Response) {
   const {limit, page, sortBy, reverse, verified, music, hasNER} = GetVideosQuerySchema.parse(req.query);
 
-  try {
-    const reviews = await VideoService.getAll({limit, page, sortBy, reverse, filters: {verified, music, hasNER}});
-    return res.status(200).json(reviews);
-  } catch (error) {
-    console.error("Error fetching reviews:", error);
-    return res.status(500).json({error: "Internal server error"});
-  }
+  const reviews = await VideoService.getAll({limit, page, sortBy, reverse, filters: {verified, music, hasNER}});
+  return res.status(200).json(reviews);
 }

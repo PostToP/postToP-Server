@@ -11,6 +11,5 @@ export async function authRequestHandler(req: Request, res: Response) {
   const {username, password} = AuthRequestSchema.parse(req.body);
 
   const token = await AuthService.auth(username, password);
-  res.status(200).json({token});
-  return;
+  return res.status(200).json({token});
 }

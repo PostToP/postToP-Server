@@ -25,7 +25,5 @@ export async function getUserController(req: Request, res: Response) {
       const topGenres = await UserService.getTopGenres(userHandle, startDate, endDate);
       return res.status(200).json(topGenres);
     }
-    default:
-      return res.status(400).json({error: "Invalid type parameter"});
   }
 }

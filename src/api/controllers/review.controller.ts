@@ -11,13 +11,8 @@ export async function postIsMusicReviewRequestHandler(req: Request, res: Respons
   const userID = req.userID!;
   const {watchID, is_music} = IsMusicReviewSchema.parse(req.body);
 
-  try {
-    await ReviewService.addIsMusicReview(watchID, userID, is_music);
-    return res.status(200).json({message: "Review added successfully"});
-  } catch (error) {
-    console.error("Error adding review:", error);
-    return res.status(500).json({error: "Internal server error"});
-  }
+  await ReviewService.addIsMusicReview(watchID, userID, is_music);
+  return res.status(200).json({message: "Review added successfully"});
 }
 
 const NERReviewSchema = z.object({
@@ -41,11 +36,6 @@ export async function postNERReviewRequestHandler(req: Request, res: Response) {
 
   const {watchID, language, namedEntities} = NERReviewSchema.parse(req.body);
 
-  try {
-    await ReviewService.addNERReview(watchID, userID, language, namedEntities);
-    return res.status(200).json({message: "NER Review added successfully"});
-  } catch (error) {
-    console.error("Error adding NER review:", error);
-    return res.status(500).json({error: "Internal server error"});
-  }
+  await ReviewService.addNERReview(watchID, userID, language, namedEntities);
+  return res.status(200).json({message: "NER Review added successfully"});
 }
