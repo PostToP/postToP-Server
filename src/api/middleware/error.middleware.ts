@@ -5,21 +5,20 @@ import {logger} from "../../utils/logger";
 
 export function processErrorMiddleware(err: Error, _req: Request, res: Response, _next: NextFunction) {
   if (err instanceof ClientError) {
-    logger.info("Client error:", err.message);
+    // logger.info(err.message, "Client error:");
     res.status(err.httpCode).json({message: err.message});
     return;
   }
   if (err instanceof ExpectedError) {
-    logger.warn("Expected server error:", err.message);
+    logger.warn(err.message, "Expected server error:");
     res.status(500).json({message: "Internal Server Error"});
     return;
   }
   if (err instanceof z.ZodError) {
-    logger.info("Validation error:", err.issues);
+    // logger.info(err.message, "Validation error:");
     res.status(400).json({message: "Invalid request data", details: err.issues});
     return;
   }
-  logger.error("Unexpected error:", {error: err});
-  console.error(err);
+  logger.error({err}, "Unexpected error:");
   res.status(500).json({message: "Internal Server Error"});
 }

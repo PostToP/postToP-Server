@@ -60,14 +60,13 @@ async function startServer(port: number) {
     );
 
     if (process.env.NODE_ENV !== "production") {
-      logger.error("Full promise details:", promise);
+      logger.error({promise}, "Full promise details:");
       exitHandler("unhandledRejection");
     }
   });
 
   process.on("uncaughtException", error => {
-    logger.error("Uncaught Exception:", error);
-    console.error("Uncaught Exception:", error);
+    logger.error({error}, "Uncaught Exception:");
     if (process.env.NODE_ENV !== "production") {
       exitHandler("uncaughtException");
     }
