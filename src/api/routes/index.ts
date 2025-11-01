@@ -16,7 +16,7 @@ import {authMiddleware} from "../middleware/auth.middleware";
 export function setupAPIRoutes() {
   const app = express();
 
-  app.use(cors({origin: "*", credentials: true}));
+  app.use(cors({origin: true, credentials: true}));
   app.use(
     urlencoded({
       extended: true,
