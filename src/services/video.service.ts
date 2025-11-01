@@ -3,6 +3,7 @@ import {ArtistQueries} from "../database/queries/artist.queries";
 import {CategoryQueries} from "../database/queries/genre.queries";
 import {type QueryForAllParams, VideoQueries} from "../database/queries/video.queries";
 import type {YouTubeApiResponse} from "../interface/youtube";
+import {ChannelService} from "./channel.service";
 import {YouTubeService} from "./youtube.service";
 
 export class VideoService {
@@ -35,7 +36,7 @@ export class VideoService {
     const db = DatabaseManager.getInstance();
 
     return db.transaction().execute(async trx => {
-      const insertedArtist = await ArtistQueries.insert(trx, data.channelId, data.channelTitle);
+      const insertedArtist = await ChannelService.getOrFetch(trx, data.channelId);
       if (!insertedArtist) {
         throw new Error("Failed to insert or fetch artist");
       }

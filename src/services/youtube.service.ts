@@ -1,4 +1,4 @@
-import type {YouTubeApiResponse} from "../interface/youtube";
+import type {YouTubeApiResponse, YoutubeChannelApiResponse} from "../interface/youtube";
 
 const YT_API_BASE_URL = "https://youtube.googleapis.com/youtube/v3";
 
@@ -22,7 +22,7 @@ export class YouTubeService {
     }
   }
 
-  static async fetchArtistChannelDetails(channelId: string): Promise<YouTubeApiResponse> {
+  static async fetchArtistChannelDetails(channelId: string): Promise<YoutubeChannelApiResponse> {
     const baseUrl = `${YT_API_BASE_URL}/channels`;
     const params = new URLSearchParams({
       part: "snippet,topicDetails,contentDetails",
@@ -34,7 +34,7 @@ export class YouTubeService {
       const response = await fetch(url);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
-      const data = (await response.json()) as YouTubeApiResponse;
+      const data = (await response.json()) as YoutubeChannelApiResponse;
       return data;
     } catch (error) {
       throw new Error(`Failed to fetch YouTube channel details: ${error}`);

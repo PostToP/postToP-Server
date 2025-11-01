@@ -41,6 +41,7 @@ export interface Channel {
   id: Generated<ChannelID>;
   name: string;
   yt_id: ChannelYTID;
+  profile_picture_uri: string | null;
 }
 
 export interface IsMusicVideo {
