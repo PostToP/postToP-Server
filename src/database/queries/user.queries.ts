@@ -69,12 +69,13 @@ export class UserQueries {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
-      .groupBy(["v.yt_id", "video_metadata.title", "c.name", "c.yt_id"])
+      .groupBy(["v.yt_id", "video_metadata.title", "c.name", "c.yt_id", "c.profile_picture_uri"])
       .select(eb => [
         eb.ref("v.yt_id").as("video_id"),
         eb.ref("video_metadata.title").as("video_title"),
         eb.ref("c.name").as("artist_name"),
         eb.ref("c.yt_id").as("artist_id"),
+        eb.ref("c.profile_picture_uri").as("artist_profile_picture_url"),
         db.fn.count("listened.video_id").as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
@@ -86,6 +87,7 @@ export class UserQueries {
       artist_name: string;
       artist_id: string;
       listen_count: number;
+      artist_profile_picture_url: string | null;
     };
 
     return query.execute() as Promise<TopMusicRow[]>;
@@ -95,10 +97,11 @@ export class UserQueries {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
-      .groupBy(["c.yt_id", "c.name"])
+      .groupBy(["c.yt_id", "c.name", "c.profile_picture_uri"])
       .select(eb => [
         eb.ref("c.yt_id").as("artist_id"),
         eb.ref("c.name").as("artist_name"),
+        eb.ref("c.profile_picture_uri").as("artist_profile_picture_url"),
         db.fn.count("listened.video_id").as("listen_count"),
       ])
       .orderBy("listen_count", "desc")

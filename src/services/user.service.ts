@@ -26,6 +26,7 @@ export class UserService {
       channel: {
         yt_id: row.artist_id,
         name: row.artist_name,
+        profile_picture_url: row.artist_profile_picture_url,
       },
     }));
   }
