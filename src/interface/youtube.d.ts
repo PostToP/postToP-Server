@@ -53,7 +53,7 @@ export interface Localizations {
 }
 
 export interface LocalizationThing {
-  title: string;
+  title: string | null;
   description: string;
 }
 
