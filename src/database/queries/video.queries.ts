@@ -1,7 +1,7 @@
-import {sql, type Transaction} from "kysely";
-import type {DB} from "../../model/db";
-import type {ChannelID, VideoID, VideoYTID} from "../../model/override";
-import {DatabaseManager} from "..";
+import { type Transaction, sql } from "kysely";
+import { DatabaseManager } from "..";
+import { DB, ModelType } from "../../model/db";
+import type { ChannelID, VideoID, VideoYTID } from "../../model/override";
 
 export interface QueryForAllParams {
   limit?: number;
@@ -79,7 +79,7 @@ export class VideoQueries {
   static async insertMetadata(trx: Transaction<DB>, id: VideoID, language: string, title: string, description: string) {
     return trx
       .insertInto("video_metadata")
-      .values({video_id: id, language, title, description})
+      .values({ video_id: id, language, title, description })
       .onConflict(oc => oc.doNothing())
       .execute();
   }
@@ -111,10 +111,9 @@ export class VideoQueries {
         "submitted_by_id",
         "in",
         db
-          .selectFrom("user_role")
-          .innerJoin("role", "user_role.role_id", "role.id")
-          .select("user_id")
-          .where("role.name", "=", "ai"),
+          .selectFrom("model")
+          .select("model.id")
+          .where("model.type", "=", ModelType.IS_MUSIC_CLASSIFIER),
       )
       .selectAll()
       .executeTakeFirst();
@@ -254,7 +253,7 @@ export class VideoQueries {
     videoID: VideoID,
     userID: number,
     language: any,
-    namedEntities: {NER: string; text: string; start: number; end: number}[],
+    namedEntities: { NER: string; text: string; start: number; end: number }[],
   ) {
     console.log("Inserting NER review", videoID, userID, language, JSON.stringify(namedEntities));
     const db = DatabaseManager.getInstance();
