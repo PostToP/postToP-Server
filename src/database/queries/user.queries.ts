@@ -1,6 +1,6 @@
-import {sql} from "kysely";
-import type {ModelType} from "../../model/db";
-import {DatabaseManager} from "..";
+import { sql } from "kysely";
+import { DatabaseManager } from "..";
+import type { ModelType } from "../../model/db";
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id") {
@@ -61,7 +61,6 @@ export class UserQueries {
     } else {
       query = query.where("listened_at", ">", sql<Date>`NOW() - INTERVAL '7 day'`);
     }
-
     return query;
   }
 
@@ -76,7 +75,7 @@ export class UserQueries {
         eb.ref("c.name").as("artist_name"),
         eb.ref("c.yt_id").as("artist_id"),
         eb.ref("c.profile_picture_uri").as("artist_profile_picture_url"),
-        db.fn.count("listened.video_id").as("listen_count"),
+        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
       .limit(10);
@@ -102,7 +101,7 @@ export class UserQueries {
         eb.ref("c.yt_id").as("artist_id"),
         eb.ref("c.name").as("artist_name"),
         eb.ref("c.profile_picture_uri").as("artist_profile_picture_url"),
-        db.fn.count("listened.video_id").as("listen_count"),
+        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
       .limit(10);
@@ -115,7 +114,7 @@ export class UserQueries {
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
       .groupBy(["cat.id", "cat.name"])
-      .select(eb => [eb.ref("cat.name").as("genre_name"), db.fn.count("listened.video_id").as("listen_count")])
+      .select(eb => [eb.ref("cat.name").as("genre_name"), db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),])
       .orderBy("listen_count", "desc")
       .limit(10);
     return query.execute();
