@@ -268,4 +268,18 @@ export class VideoQueries {
       .onConflict(oc => oc.doNothing())
       .execute();
   }
+
+  static async insertGenreReview(videoID: VideoID, userID: number, genres: string[]) {
+    console.log("Inserting Genre review", videoID, userID, JSON.stringify(genres));
+    const db = DatabaseManager.getInstance();
+    return db
+      .insertInto("genre_review")
+      .values({
+        video_id: videoID,
+        user_id: userID,
+        genres: genres,
+      })
+      .onConflict(oc => oc.doNothing())
+      .execute();
+  }
 }

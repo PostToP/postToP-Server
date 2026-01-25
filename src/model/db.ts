@@ -3,8 +3,8 @@
  * Please do not edit it manually.
  */
 
-import type {ColumnType} from "kysely";
-import type {ChannelID, ChannelYTID, VideoID, VideoYTID} from "./override";
+import type { ColumnType } from "kysely";
+import type { ChannelID, ChannelYTID, VideoID, VideoYTID } from "./override";
 
 export enum ModelType {
   GENRE_CLASSIFIER = "genre_classifier",
@@ -40,8 +40,16 @@ export interface Category {
 export interface Channel {
   id: Generated<ChannelID>;
   name: string;
-  yt_id: ChannelYTID;
   profile_picture_uri: string | null;
+  yt_id: ChannelYTID;
+}
+
+export interface GenreReview {
+  created_at: Generated<Timestamp | null>;
+  genres: string[];
+  id: Generated<number>;
+  user_id: number | null;
+  video_id: number | null;
 }
 
 export interface IsMusicVideo {
@@ -124,6 +132,7 @@ export interface VideoMetadata {
 export interface DB {
   category: Category;
   channel: Channel;
+  genre_review: GenreReview;
   is_music_video: IsMusicVideo;
   is_music_video_prediction: IsMusicVideoPrediction;
   listened: Listened;
