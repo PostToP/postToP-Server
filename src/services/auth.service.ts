@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {UserQueries} from "../database/queries/user.queries";
-import {InvalidUserError} from "../interface/errors";
+import { UserQueries } from "../database/queries/user.queries";
+import { InvalidUserError, UsernameTakenError } from "../interface/errors";
 
 const jwtToken = process.env.JWT_TOKEN ?? "";
 
@@ -11,7 +11,7 @@ export class AuthService {
       throw new InvalidUserError("Invalid username or password");
     }
     const user = await UserQueries.fetchBy(username, "username");
-    const token = jwt.sign({userId: user?.id}, jwtToken, {expiresIn: "90d"});
+    const token = jwt.sign({ userId: user?.id }, jwtToken, { expiresIn: "90d" });
     return token;
   }
 
@@ -37,6 +37,17 @@ export class AuthService {
         data: null,
       };
     }
+  }
+
+  static async register(username: string, password: string) {
+    const existingUser = await UserQueries.fetchBy(username, "username");
+    if (existingUser) {
+      throw new UsernameTakenError("Username already exists");
+    }
+
+    const password_hash = bcrypt.hashSync(password, 10);
+
+    await UserQueries.insert(username, password_hash);
   }
 }
 

@@ -24,6 +24,15 @@ export class UserQueries {
     return db.selectFrom("user").select(["password_hash"]).where("username", "=", username).executeTakeFirst();
   }
 
+  static async insert(username: string, password_hash: string) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .insertInto("user")
+      .values({ username, password_hash })
+      .returningAll()
+      .executeTakeFirst();
+  }
+
   static async getListenedMusic(userHandle: string) {
     const db = DatabaseManager.getInstance();
     return db
