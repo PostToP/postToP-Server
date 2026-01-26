@@ -1,6 +1,6 @@
-import type {Request, Response} from "express";
-import {z} from "zod";
-import {UserService} from "../../services/user.service";
+import type { Request, Response } from "express";
+import { z } from "zod";
+import { UserService } from "../../services/user.service";
 
 const QuerySchema = z.object({
   type: z.enum(["music", "artist", "genre"]),
@@ -10,7 +10,7 @@ const QuerySchema = z.object({
 
 export async function getUserController(req: Request, res: Response) {
   const userHandle = req.params.handle;
-  const {type, startDate, endDate} = QuerySchema.parse(req.query);
+  const { type, startDate, endDate } = QuerySchema.parse(req.query);
 
   switch (type) {
     case "music": {
@@ -26,4 +26,18 @@ export async function getUserController(req: Request, res: Response) {
       return res.status(200).json(topGenres);
     }
   }
+}
+
+const UserHistoryParamsSchema = z.object({
+  handle: z.string(),
+  limit: z.coerce.number().min(1).max(100).default(20),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+
+export async function getUserHistoryController(req: Request, res: Response) {
+  const userHandle = req.params.handle;
+  const filters = UserHistoryParamsSchema.parse(req.params);
+  const history = await UserService.getUserHistory(userHandle, filters);
+  return res.status(200).json(history);
 }

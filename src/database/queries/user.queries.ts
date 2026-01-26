@@ -33,21 +33,6 @@ export class UserQueries {
       .executeTakeFirst();
   }
 
-  static async getListenedMusic(userHandle: string) {
-    const db = DatabaseManager.getInstance();
-    return db
-      .selectFrom("listened")
-      .where("user_id", "=", db.selectFrom("user").select("id").where("handle", "=", userHandle))
-      .innerJoin("video as v", "listened.video_id", "v.id")
-      .innerJoin("video_metadata", join =>
-        join.onRef("v.id", "=", "video_metadata.video_id").onRef("default_language", "=", "video_metadata.language"),
-      )
-      .orderBy("listened_at", "desc")
-      .selectAll()
-      .limit(50)
-      .execute();
-  }
-
   private static getListenedAll(user_id: number, startDate?: Date, endDate?: Date) {
     const db = DatabaseManager.getInstance();
     let query = db
@@ -127,5 +112,21 @@ export class UserQueries {
       .orderBy("listen_count", "desc")
       .limit(10);
     return query.execute();
+  }
+
+  static async getUserHistory(user_id: number, filters: Partial<{ limit: number, offset: number }> = {}) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .selectFrom("listened")
+      .innerJoin("video as v", "listened.video_id", "v.id")
+      .innerJoin("video_metadata", join =>
+        join.onRef("v.id", "=", "video_metadata.video_id").onRef("default_language", "=", "video_metadata.language"),
+      )
+      .where("user_id", "=", user_id)
+      .orderBy("listened.listened_at", "desc")
+      .selectAll()
+      .limit(filters.limit ?? 100)
+      .offset(filters.offset ?? 0)
+      .execute();
   }
 }
