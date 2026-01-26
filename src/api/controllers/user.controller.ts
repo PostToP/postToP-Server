@@ -29,7 +29,6 @@ export async function getUserController(req: Request, res: Response) {
 }
 
 const UserHistoryParamsSchema = z.object({
-  handle: z.string(),
   limit: z.coerce.number().min(1).max(100).default(20),
   offset: z.coerce.number().min(0).default(0),
 });
@@ -37,7 +36,7 @@ const UserHistoryParamsSchema = z.object({
 
 export async function getUserHistoryController(req: Request, res: Response) {
   const userHandle = req.params.handle;
-  const filters = UserHistoryParamsSchema.parse(req.params);
+  const filters = UserHistoryParamsSchema.parse(req.query);
   const history = await UserService.getUserHistory(userHandle, filters);
   return res.status(200).json(history);
 }
