@@ -35,4 +35,19 @@ export class UserService {
     if (!user) throw new InvalidUserError("User not found");
     return UserQueries.getTopGenres(user.id, startDate, endDate);
   }
+
+  static async getUserStats(userHandle: string, filters: Partial<{ startDate: Date; endDate: Date }>) {
+    const user = await UserQueries.fetchBy(userHandle, "handle");
+    if (!user) throw new InvalidUserError("User not found");
+    const data = Promise.all([
+      UserQueries.getUserTotalSeconds(user.id),
+      UserQueries.getUserTotalSeconds(user.id, filters),
+      UserQueries.getUserListenSegments(user.id, filters),
+    ]).then(([totalListens, totalListensFilter, listenSegments]) => ({
+      total_listens: totalListens,
+      total_listens_filtered: totalListensFilter,
+      listen_segments: listenSegments,
+    }));
+    return data;
+  }
 }

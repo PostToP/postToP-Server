@@ -26,11 +26,7 @@ export class UserQueries {
 
   static async insert(username: string, password_hash: string) {
     const db = DatabaseManager.getInstance();
-    return db
-      .insertInto("user")
-      .values({ username, password_hash })
-      .returningAll()
-      .executeTakeFirst();
+    return db.insertInto("user").values({ username, password_hash }).returningAll().executeTakeFirst();
   }
 
   private static getListenedAll(user_id: number, startDate?: Date, endDate?: Date) {
@@ -108,13 +104,16 @@ export class UserQueries {
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
       .groupBy(["cat.id", "cat.name"])
-      .select(eb => [eb.ref("cat.name").as("genre_name"), db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),])
+      .select(eb => [
+        eb.ref("cat.name").as("genre_name"),
+        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
+      ])
       .orderBy("listen_count", "desc")
       .limit(10);
     return query.execute();
   }
 
-  static async getUserHistory(user_id: number, filters: Partial<{ limit: number, offset: number }> = {}) {
+  static async getUserHistory(user_id: number, filters: Partial<{ limit: number; offset: number }> = {}) {
     const db = DatabaseManager.getInstance();
     return db
       .selectFrom("listened")
@@ -128,5 +127,50 @@ export class UserQueries {
       .limit(filters.limit ?? 100)
       .offset(filters.offset ?? 0)
       .execute();
+  }
+
+  static async getUserTotalSeconds(user_id: number, filters?: Partial<{ startDate: Date; endDate: Date }>) {
+    const db = DatabaseManager.getInstance();
+    let query = db
+      .selectFrom("listened")
+      .where("user_id", "=", user_id)
+      .innerJoin("video as v", "listened.video_id", "v.id")
+      .select(db.fn.sum<number>(sql`v.duration`).as("total_seconds"));
+
+    if (filters?.startDate) {
+      query = query.where("listened.listened_at", ">=", filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      query = query.where("listened.listened_at", "<=", filters.endDate);
+    }
+
+    const resultRow = await query.executeTakeFirst();
+
+    return resultRow?.total_seconds ?? 0;
+  }
+
+  static async getUserListenSegments(user_id: number, filters?: Partial<{ startDate: Date; endDate: Date }>) {
+    const db = DatabaseManager.getInstance();
+    let query = db
+      .selectFrom("listened")
+      .innerJoin("video", "listened.video_id", "video.id")
+      .where("listened.user_id", "=", user_id)
+      .groupBy(sql`DATE_TRUNC('day', listened.listened_at)`)
+      .select(eb => [
+        sql<Date>`DATE_TRUNC('day', listened.listened_at)`.as("day"),
+        eb.fn.sum<number>("video.duration").as("total_seconds"),
+      ])
+      .orderBy("day", "asc");
+
+    if (filters?.startDate) {
+      query = query.where("listened.listened_at", ">=", filters.startDate);
+    }
+
+    if (filters?.endDate) {
+      query = query.where("listened.listened_at", "<=", filters.endDate);
+    }
+
+    return query.execute();
   }
 }

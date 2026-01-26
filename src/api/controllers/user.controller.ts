@@ -40,3 +40,16 @@ export async function getUserHistoryController(req: Request, res: Response) {
   const history = await UserService.getUserHistory(userHandle, filters);
   return res.status(200).json(history);
 }
+
+
+const UserStatsParamsSchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().optional(),
+});
+
+export async function getUserStatsController(req: Request, res: Response) {
+  const userHandle = req.params.handle;
+  const filters = UserStatsParamsSchema.parse(req.query);
+  const stats = await UserService.getUserStats(userHandle, filters);
+  return res.status(200).json(stats);
+}
