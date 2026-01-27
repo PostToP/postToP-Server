@@ -32,6 +32,7 @@ export function setupAPIRoutes() {
   app.post("/review/ner", authMiddleware, postNERReviewRequestHandler);
   app.post("/review/genre", authMiddleware, postGenreReviewRequestHandler);
   app.get("/user/:handle/top", getUserController);
+  app.get("/user/:handle", getUserController); // legacy route
   app.get("/user/:handle/history", getUserHistoryController);
   app.get("/user/:handle/stats", getUserStatsController);
   app.get("/videos", getVideosController);
