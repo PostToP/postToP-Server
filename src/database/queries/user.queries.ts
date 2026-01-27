@@ -124,7 +124,12 @@ export class UserQueries {
       .innerJoin("channel as c", "v.channel_id", "c.id")
       .where("user_id", "=", user_id)
       .orderBy("listened.listened_at", "desc")
-      .selectAll()
+      .select(eb => [
+        eb.ref("v.yt_id").as("yt_id"),
+        eb.ref("video_metadata.title").as("video_title"),
+        eb.ref("listened.listened_at").as("listened_at"),
+        eb.ref("c.name").as("artist_name"),
+      ])
       .limit(filters.limit ?? 100)
       .offset(filters.offset ?? 0)
       .execute();
