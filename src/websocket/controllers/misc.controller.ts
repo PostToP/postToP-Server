@@ -31,7 +31,7 @@ export function announceSongToEvedroppers(userID: number) {
   }) as ExtendedWebSocketConnection | undefined;
 
   let data;
-  if (originalWS === undefined || originalWS.currentlyPlayingData === undefined) {
+  if (originalWS === undefined || originalWS.currentlyPlayingData === undefined || originalWS.currentlyPlayingData.video.isMusic.is_music === false) {
     data = {
       userId: userID, video: null, listeningData: null
     }
@@ -92,17 +92,17 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
     const eClient = client as ExtendedWebSocketConnection;
     return eClient.userId === ws.userId && eClient.phase === WebSocketPhase.CONNECTED && eClient.authenticated;
   }) as ExtendedWebSocketConnection | undefined;
-  if (originalWS?.currentlyPlayingData) {
-    ws.send(
-      JSON.stringify({
-        op: ResponseOperationType.VIDEO_UPDATE,
-        d: {
-          userId: ws.userId,
-          video: originalWS.currentlyPlayingData.video,
-          listeningData: originalWS.currentlyPlayingData.listeningData,
-        },
-      }),
-    );
-  }
+  if (!originalWS?.currentlyPlayingData) return;
+  if (originalWS.currentlyPlayingData.video.isMusic.is_music === false) return;
+  ws.send(
+    JSON.stringify({
+      op: ResponseOperationType.VIDEO_UPDATE,
+      d: {
+        userId: ws.userId,
+        video: originalWS.currentlyPlayingData.video,
+        listeningData: originalWS.currentlyPlayingData.listeningData,
+      },
+    }),
+  );
   logger.info(`User ${ws.userId} started eavesdropping`);
 }

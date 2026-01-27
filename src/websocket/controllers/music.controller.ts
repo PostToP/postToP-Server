@@ -32,6 +32,7 @@ export function videoUpdateWebsocketHandler(ws: ExtendedWebSocketConnection, dat
     case VideoStatus.PLAYING:
     case VideoStatus.PAUSED:
       if (ws.currentlyPlayingData === undefined) return
+      if (ws.currentlyPlayingData.video.isMusic.is_music === false) return;
       ws.currentlyPlayingData.listeningData.currentTime = data.currentTime;
       ws.currentlyPlayingData.listeningData.status = data.status;
       ws.currentlyPlayingData.listeningData.updatedAt = new Date();
