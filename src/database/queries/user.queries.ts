@@ -121,6 +121,7 @@ export class UserQueries {
       .innerJoin("video_metadata", join =>
         join.onRef("v.id", "=", "video_metadata.video_id").onRef("default_language", "=", "video_metadata.language"),
       )
+      .innerJoin("channel as c", "v.channel_id", "c.id")
       .where("user_id", "=", user_id)
       .orderBy("listened.listened_at", "desc")
       .selectAll()
