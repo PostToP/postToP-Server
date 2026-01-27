@@ -173,4 +173,16 @@ export class UserQueries {
 
     return query.execute();
   }
+
+  static async getTotalListenedHours() {
+    const db = DatabaseManager.getInstance();
+    const result = await db
+      .selectFrom("listened")
+      .innerJoin("video", "listened.video_id", "video.id")
+      .select(db.fn.sum<number>("video.duration").as("total_seconds"))
+      .executeTakeFirst();
+
+    const total_seconds = result?.total_seconds ?? 0;
+    return total_seconds / 3600;
+  }
 }

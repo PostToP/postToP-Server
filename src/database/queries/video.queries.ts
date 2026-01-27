@@ -249,6 +249,23 @@ export class VideoQueries {
     return totalCount.total_count as number;
   }
 
+  static async numberOfMusicVideos() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("video")
+      .leftJoin("is_music_video", "video.id", "is_music_video.video_id")
+      .leftJoin("is_music_video_prediction", "video.id", "is_music_video_prediction.video_id")
+      .where(eb =>
+        eb.or([
+          eb("is_music_video.is_music", "=", true),
+          eb("is_music_video_prediction.is_music", "=", true),
+        ]),
+      )
+      .select(_eb => [sql`count(distinct video.id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+    return totalCount.total_count as number;
+  }
+
   static async insertNERReview(
     videoID: VideoID,
     userID: number,

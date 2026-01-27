@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "../../utils/swagger";
 import { authRequestHandler, registerRequestHandler } from "../controllers/auth.controller";
 import { postGenreReviewRequestHandler, postIsMusicReviewRequestHandler, postNERReviewRequestHandler } from "../controllers/review.controller";
+import { getServerStatsController } from "../controllers/stat.controller";
 import { getUserController, getUserHistoryController, getUserStatsController } from "../controllers/user.controller";
 import { getVideosController } from "../controllers/video.controller";
 import { getYoutubeArtistChannelController } from "../controllers/youtube.controller";
@@ -37,6 +38,7 @@ export function setupAPIRoutes() {
   app.get("/user/:handle/stats", getUserStatsController);
   app.get("/videos", getVideosController);
   app.get("/youtube/artist-channel", authMiddleware, getYoutubeArtistChannelController);
+  app.get("/stats", getServerStatsController);
 
   app.use(processErrorMiddleware);
   return app;
