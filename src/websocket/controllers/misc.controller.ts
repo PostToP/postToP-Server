@@ -24,21 +24,42 @@ export function heartbeatWebsocketHandler(ws: ExtendedWebSocketConnection, _data
 
 // TODO: Replace this with some kind of event system or pub/sub pattern
 // but this is fine for now
-export function announceSongToEvedroppers(userID: number, music: any) {
-  if (music.watchID === undefined || music.watchID === "") return;
-  for (const client of wssServer.clients) {
-    // @ts-expect-error
-    if (client.readyState === WebSocket.OPEN && client.phase === WebSocketPhase.CONNECTED && client.userId === userID) {
-      client.send(
-        JSON.stringify({
-          op: ResponseOperationType.VIDEO_UPDATE,
-          d: {
-            userId: userID,
-            ...music,
-          },
-        }),
-      );
+export function announceSongToEvedroppers(userID: number) {
+  const originalWS = Array.from(wssServer.clients).find(client => {
+    const eClient = client as ExtendedWebSocketConnection;
+    return eClient.userId === userID && eClient.phase === WebSocketPhase.CONNECTED && eClient.authenticated;
+  }) as ExtendedWebSocketConnection | undefined;
+
+  let data;
+  if (originalWS === undefined || originalWS.currentlyPlayingData === undefined) {
+    data = {
+      userId: userID, video: null, listeningData: null
     }
+  } else {
+    data = {
+      userId: userID,
+      video: originalWS.currentlyPlayingData.video,
+      listeningData: originalWS.currentlyPlayingData.listeningData,
+    };
+  }
+
+  if (data.video !== null && data.video.isMusic.is_music === false) {
+    return;
+  }
+
+
+  for (const client of wssServer.clients) {
+    if (client.readyState !== WebSocket.OPEN) continue;
+    const eClient = client as ExtendedWebSocketConnection;
+    if (eClient.phase !== WebSocketPhase.CONNECTED) continue;
+    if (eClient.userId !== userID) continue;
+    if (eClient.authenticated) continue;
+    client.send(
+      JSON.stringify({
+        op: ResponseOperationType.VIDEO_UPDATE,
+        d: data
+      }),
+    );
   }
   logger.info(`Announced song update by user ${userID} to eavesdroppers`);
 }
@@ -67,6 +88,21 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
       d: { message: "Eavesdropping started" },
     }),
   );
-  //TODO: get currently playing music from eavesdroppee, needs redis server or jank dictionary
+  const originalWS = Array.from(wssServer.clients).find(client => {
+    const eClient = client as ExtendedWebSocketConnection;
+    return eClient.userId === ws.userId && eClient.phase === WebSocketPhase.CONNECTED && eClient.authenticated;
+  }) as ExtendedWebSocketConnection | undefined;
+  if (originalWS?.currentlyPlayingData) {
+    ws.send(
+      JSON.stringify({
+        op: ResponseOperationType.VIDEO_UPDATE,
+        d: {
+          userId: ws.userId,
+          video: originalWS.currentlyPlayingData.video,
+          listeningData: originalWS.currentlyPlayingData.listeningData,
+        },
+      }),
+    );
+  }
   logger.info(`User ${ws.userId} started eavesdropping`);
 }

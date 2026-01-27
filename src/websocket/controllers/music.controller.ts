@@ -1,7 +1,7 @@
 import { VideoQueries } from "../../database/queries/video.queries";
 import {
   type ExtendedWebSocketConnection,
-  type ListeingData,
+  type ListeningData,
   ResponseOperationType,
   type VideoRequestData,
   type VideoResponseData,
@@ -31,19 +31,19 @@ export function videoUpdateWebsocketHandler(ws: ExtendedWebSocketConnection, dat
       break;
     case VideoStatus.PLAYING:
     case VideoStatus.PAUSED:
-      announceSongToEvedroppers(ws.userId, data);
+      if (ws.currentlyPlayingData === undefined) return
+      ws.currentlyPlayingData.listeningData.currentTime = data.currentTime;
+      ws.currentlyPlayingData.listeningData.status = data.status;
+      ws.currentlyPlayingData.listeningData.updatedAt = new Date();
+      announceSongToEvedroppers(ws.userId);
       break;
     case VideoStatus.ENDED:
       listenedToMusicWebsocketHandler(ws, data);
       break;
     default:
-      ws.send(
-        JSON.stringify({
-          op: ResponseOperationType.ERROR,
-          d: { message: "Invalid video status" },
-        }),
-      );
-      logger.error(`User ${ws.userId} sent invalid video status: ${videoStatus}`);
+      // assume aborted
+      ws.currentlyPlayingData = undefined;
+      announceSongToEvedroppers(ws.userId);
       break;
   }
 }
@@ -74,7 +74,7 @@ async function listenedToMusicWebsocketHandler(ws: ExtendedWebSocketConnection, 
     return;
   }
   MusicService.recordListened(data.watchID, ws.userId);
-  announceSongToEvedroppers(ws.userId, data);
+  announceSongToEvedroppers(ws.userId);
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.VIDEO_UPDATE,
@@ -135,10 +135,15 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
   );
   logger.info(`User ${ws.userId} started listening to music successfully`);
 
-  const listeningData: ListeingData = {
+  const listeningData: ListeningData = {
     currentTime: data.currentTime,
     status: data.status,
     updatedAt: new Date(),
+  };
+
+  ws.currentlyPlayingData = {
+    video: responseVideo,
+    listeningData: listeningData,
   };
 
   if (!isMusic.is_music) return;
@@ -148,8 +153,5 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     return;
   }
 
-  announceSongToEvedroppers(ws.userId, {
-    video: responseVideo,
-    listeningData: listeningData,
-  });
+  announceSongToEvedroppers(ws.userId);
 }

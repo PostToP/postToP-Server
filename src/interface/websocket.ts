@@ -1,4 +1,4 @@
-import type {WebSocket} from "ws";
+import type { WebSocket } from "ws";
 
 export enum RequestOperationType {
   AUTH = 1,
@@ -37,10 +37,14 @@ export interface ExtendedWebSocketConnection extends WebSocket {
   phase: WebSocketPhase;
   authenticated: boolean;
   disconnectTimeout?: NodeJS.Timeout;
+  currentlyPlayingData?: {
+    video: VideoResponseData;
+    listeningData: ListeningData;
+  }
 }
 
 // biome-ignore lint/complexity/noBannedTypes: <explanation> Using Object type for WebsocketData to allow extension </explanation>
-interface WebsocketData extends Object {}
+type WebsocketData = Object;
 
 export interface VideoRequestData extends WebsocketData {
   watchID: string;
@@ -63,15 +67,15 @@ export interface VideoResponseData extends WebsocketData {
   };
 }
 
-export interface ListeingData extends WebsocketData {
+export interface ListeningData extends WebsocketData {
   currentTime: number;
   status: VideoStatus;
   updatedAt: Date;
 }
 
 export enum VideoStatus {
-  STARTED,
-  PLAYING,
-  PAUSED,
-  ENDED,
+  STARTED = 0,
+  PLAYING = 1,
+  PAUSED = 2,
+  ENDED = 3,
 }
