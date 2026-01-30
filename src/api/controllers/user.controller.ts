@@ -8,7 +8,7 @@ const QuerySchema = z.object({
   endDate: z.coerce.date().optional(),
 });
 
-export async function getUserController(req: Request, res: Response) {
+export async function getUserStatisticsController(req: Request, res: Response) {
   const userHandle = req.params.handle;
   const { type, startDate, endDate } = QuerySchema.parse(req.query);
 
@@ -52,4 +52,10 @@ export async function getUserStatsController(req: Request, res: Response) {
   const filters = UserStatsParamsSchema.parse(req.query);
   const stats = await UserService.getUserStats(userHandle, filters);
   return res.status(200).json(stats);
+}
+
+export async function getUserInfoController(req: Request, res: Response) {
+  const userHandle = req.params.handle;
+  const userInfo = await UserService.getUserInfo(userHandle);
+  return res.status(200).json(userInfo);
 }

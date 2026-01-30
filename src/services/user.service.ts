@@ -2,6 +2,16 @@ import { UserQueries } from "../database/queries/user.queries";
 import { InvalidUserError } from "../interface/errors";
 
 export class UserService {
+  static async getUserInfo(userHandle: string) {
+    const user = await UserQueries.fetchBy(userHandle, "handle");
+    if (!user) throw new InvalidUserError("User not found");
+    return {
+      username: user.username,
+      handle: user.handle,
+      created_at: user.created_at,
+    };
+  }
+
   static async getUserHistory(userHandle: string, filters: Partial<{ limit: number; offset: number }>) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
