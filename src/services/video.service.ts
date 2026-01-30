@@ -40,7 +40,6 @@ export class VideoService {
       if (!insertedArtist) {
         throw new Error("Failed to insert or fetch artist");
       }
-      const categoriesID = await CategoryQueries.insert(trx, data.topicCategories);
       const defaultLanguage = data.defaultLanguage || data.defaultAudioLanguage || "undefined";
       const videoID = await VideoQueries.insert(
         trx,
@@ -53,16 +52,19 @@ export class VideoService {
       if (!videoID) {
         throw new Error("Failed to insert or fetch video");
       }
-      await CategoryQueries.insertToVideo(
+      const promises = [];
+      const categoriesID = await CategoryQueries.insert(trx, data.topicCategories);
+      promises.push(CategoryQueries.insertToVideo(
         trx,
         videoID.id,
         categoriesID.map(i => i.id),
-      );
-      await VideoQueries.insertMetadata(trx, videoID.id, defaultLanguage, data.title, data.description);
+      ));
+      promises.push(VideoQueries.insertMetadata(trx, videoID.id, defaultLanguage, data.title, data.description));
       for (const [lang, localization] of Object.entries(data.localizations)) {
         if (lang === defaultLanguage) continue;
-        await VideoQueries.insertMetadata(trx, videoID.id, lang, localization.title ?? data.title, localization.description);
+        promises.push(VideoQueries.insertMetadata(trx, videoID.id, lang, localization.title ?? data.title, localization.description));
       }
+      await Promise.all(promises);
       return videoID.id;
     });
   }
