@@ -97,8 +97,10 @@ export interface Role {
 }
 
 export interface User {
+  created_at: Generated<Timestamp>;
   handle: Generated<string>;
   id: Generated<number>;
+  mail: string;
   password_hash: string;
   username: string;
 }

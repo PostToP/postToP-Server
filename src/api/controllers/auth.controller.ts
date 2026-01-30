@@ -7,6 +7,7 @@ const AuthRequestSchema = z.object({
   password: z.string().min(1),
 });
 
+
 export async function authRequestHandler(req: Request, res: Response) {
   const { username, password } = AuthRequestSchema.parse(req.body);
 
@@ -14,10 +15,15 @@ export async function authRequestHandler(req: Request, res: Response) {
   return res.status(200).json({ token });
 }
 
+const RegisterRequestSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
+  email: z.string().email(),
+});
 
 export async function registerRequestHandler(req: Request, res: Response) {
-  const { username, password } = AuthRequestSchema.parse(req.body);
+  const { username, password, email } = RegisterRequestSchema.parse(req.body);
 
-  await AuthService.register(username, password);
+  await AuthService.register(username, email, password);
   return res.status(201).json({ message: "User registered successfully" });
 }

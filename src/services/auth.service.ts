@@ -39,15 +39,19 @@ export class AuthService {
     }
   }
 
-  static async register(username: string, password: string) {
+  static async register(username: string, email: string, password: string) {
     const existingUser = await UserQueries.fetchBy(username, "username");
     if (existingUser) {
       throw new UsernameTakenError("Username already exists");
     }
+    const existingEmail = await UserQueries.fetchBy(email, "mail");
+    if (existingEmail) {
+      throw new UsernameTakenError("Email already exists");
+    }
 
     const password_hash = bcrypt.hashSync(password, 10);
 
-    await UserQueries.insert(username, password_hash);
+    await UserQueries.insert(username, email, password_hash);
   }
 }
 

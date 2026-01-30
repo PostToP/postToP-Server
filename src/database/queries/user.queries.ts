@@ -3,7 +3,7 @@ import { DatabaseManager } from "..";
 import type { ModelType } from "../../model/db";
 
 export class UserQueries {
-  static async fetchBy(identifier: string | number, type: "username" | "handle" | "id") {
+  static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
     const db = DatabaseManager.getInstance();
 
     return db.selectFrom("user").selectAll().where(type, "=", identifier).executeTakeFirst();
@@ -24,9 +24,9 @@ export class UserQueries {
     return db.selectFrom("user").select(["password_hash"]).where("username", "=", username).executeTakeFirst();
   }
 
-  static async insert(username: string, password_hash: string) {
+  static async insert(username: string, mail: string, password_hash: string) {
     const db = DatabaseManager.getInstance();
-    return db.insertInto("user").values({ username, password_hash }).returningAll().executeTakeFirst();
+    return db.insertInto("user").values({ username, password_hash, mail }).returningAll().executeTakeFirst();
   }
 
   private static getListenedAll(user_id: number, startDate?: Date, endDate?: Date) {
