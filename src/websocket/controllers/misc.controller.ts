@@ -43,11 +43,6 @@ export function announceSongToEvedroppers(userID: number) {
     };
   }
 
-  if (data.video !== null && data.video.isMusic.is_music === false) {
-    return;
-  }
-
-
   for (const client of wssServer.clients) {
     if (client.readyState !== WebSocket.OPEN) continue;
     const eClient = client as ExtendedWebSocketConnection;
