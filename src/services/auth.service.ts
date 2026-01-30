@@ -12,7 +12,13 @@ export class AuthService {
     }
     const user = await UserQueries.fetchBy(username, "username");
     const token = jwt.sign({ userId: user?.id }, jwtToken, { expiresIn: "90d" });
-    return token;
+    return {
+      token: token,
+      user: {
+        id: user?.id,
+        username: user?.username,
+      },
+    }
   }
 
   private static async isValid(username: string, password: string) {
