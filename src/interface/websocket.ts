@@ -65,6 +65,7 @@ export interface VideoResponseData extends WebsocketData {
     is_music: boolean;
     reviewed: boolean;
   };
+  NER: any[] | null;
 }
 
 export interface ListeningData extends WebsocketData {

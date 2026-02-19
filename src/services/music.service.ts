@@ -1,8 +1,8 @@
-import {MusicQueries} from "../database/queries/music.queries";
-import {VideoQueries} from "../database/queries/video.queries";
-import type {VideoID} from "../model/override";
-import {IsMusicAiService} from "./ai.service";
-import {VideoService} from "./video.service";
+import { MusicQueries } from "../database/queries/music.queries";
+import { VideoQueries } from "../database/queries/video.queries";
+import type { VideoID } from "../model/override";
+import { IsMusicAiService, NERAIService } from "./ai.service";
+import { VideoService } from "./video.service";
 
 export class MusicService {
   static async recordListened(watchID: string, userID: number) {
@@ -29,5 +29,10 @@ export class MusicService {
       is_music: is_music_ai,
       reviewed: false,
     };
+  }
+
+  static async getEntitiesInMusic(db_id: VideoID) {
+    const ner_entries_ai = await NERAIService.getOrFetch(db_id);
+    return ner_entries_ai;
   }
 }

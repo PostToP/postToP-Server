@@ -1,6 +1,6 @@
 import { type Transaction, sql } from "kysely";
 import { DatabaseManager } from "..";
-import { DB, ModelType } from "../../model/db";
+import { DB, EntityType, ModelType } from "../../model/db";
 import type { ChannelID, VideoID, VideoYTID } from "../../model/override";
 
 export interface QueryForAllParams {
@@ -298,5 +298,67 @@ export class VideoQueries {
       })
       .onConflict(oc => oc.doNothing())
       .execute();
+  }
+
+  static async fetchNERByAI(videoID: VideoID) {
+    const db = DatabaseManager.getInstance();
+    const res = await db
+      .selectFrom("ner_prediction")
+      .where("video_id", "=", videoID)
+      .selectAll()
+      .execute();
+
+    if (res.length === 0) {
+      return null;
+    }
+
+    const res2 = {
+      ORIGINAL_AUTHOR: [] as string[],
+      TITLE: [] as string[],
+      FEATURING: [] as string[],
+      MODIFIER: [] as string[],
+      VOCALOID: [] as string[],
+      MISC_PERSON: [] as string[],
+      VOCALIST: [] as string[],
+      ALT_TITLE: [] as string[],
+      ALBUM: [] as string[],
+    }
+    res.forEach(r => {
+      res2[r.entity_type as keyof typeof res2].push(r.entity_value);
+    });
+
+    return res2;
+  }
+
+  static async insertNERByAI(videoID: VideoID, modelID: number, nerResult: {
+    ORIGINAL_AUTHOR: string[];
+    TITLE: string[];
+    FEATURING: string[];
+    MODIFIER: string[];
+    VOCALOID: string[];
+    MISC_PERSON: string[];
+    VOCALIST: string[];
+    ALT_TITLE: string[];
+    ALBUM: string[];
+  }) {
+    const db = DatabaseManager.getInstance();
+    const entries = [] as {
+      video_id: VideoID;
+      submitted_by_id: number;
+      entity_type: EntityType;
+      entity_value: string;
+    }[];
+    for (const [entity_type, entity_values] of Object.entries(nerResult)) {
+      for (const entity_value of entity_values) {
+        const entity_type2 = entity_type as EntityType;
+        entries.push({
+          video_id: videoID,
+          submitted_by_id: modelID,
+          entity_type: entity_type2,
+          entity_value,
+        });
+      }
+    }
+    return db.insertInto("ner_prediction").values(entries).onConflict(oc => oc.doNothing()).execute();
   }
 }

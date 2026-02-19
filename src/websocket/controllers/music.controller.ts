@@ -108,6 +108,11 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
   }
   const videoID = await VideoService.getOrFetch(data.watchID);
   const isMusic = await MusicService.getVideoIsMusic(videoID);
+
+  let NER = null;
+  if (isMusic.is_music) {
+    NER = await MusicService.getEntitiesInMusic(videoID);
+  }
   const videoData = await VideoQueries.fetchDataAll(videoID);
 
   if (!videoData) {
@@ -124,6 +129,7 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     duration: videoData.duration,
     coverImage: `https://i.ytimg.com/vi/${data.watchID}/hqdefault.jpg`,
     isMusic: isMusic,
+    NER: NER as any,
   };
 
   ws.send(
