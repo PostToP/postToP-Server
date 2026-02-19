@@ -6,6 +6,18 @@
 import type { ColumnType } from "kysely";
 import type { ChannelID, ChannelYTID, VideoID, VideoYTID } from "./override";
 
+export enum EntityType {
+  ALBUM = "ALBUM",
+  ALT_TITLE = "ALT_TITLE",
+  FEATURING = "FEATURING",
+  MISC_PERSON = "MISC_PERSON",
+  MODIFIER = "MODIFIER",
+  ORIGINAL_AUTHOR = "ORIGINAL_AUTHOR",
+  TITLE = "TITLE",
+  VOCALIST = "VOCALIST",
+  VOCALOID = "VOCALOID",
+}
+
 export enum ModelType {
   GENRE_CLASSIFIER = "genre_classifier",
   IS_MUSIC_CLASSIFIER = "is_music_classifier",
@@ -83,6 +95,14 @@ export interface Model {
   version: string;
 }
 
+export interface NerPrediction {
+  created_at: Generated<Timestamp>;
+  entity_type: EntityType;
+  entity_value: string;
+  submitted_by_id: number;
+  video_id: VideoID;
+}
+
 export interface NerResult {
   created_at: Generated<Timestamp>;
   language: string;
@@ -140,6 +160,7 @@ export interface DB {
   listened: Listened;
   main_category: MainCategory;
   model: Model;
+  ner_prediction: NerPrediction;
   ner_result: NerResult;
   role: Role;
   user: User;
