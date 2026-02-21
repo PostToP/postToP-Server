@@ -31,6 +31,7 @@ export class UserService {
         name: row.artist_name,
         profile_picture_url: row.artist_profile_picture_url,
       },
+      NER: row.NER,
     }));
   }
 

@@ -40,7 +40,26 @@ export class UserQueries {
       )
       .innerJoin("channel as c", "v.channel_id", "c.id")
       .innerJoin("video_category as vc", "v.id", "vc.video_id")
-      .innerJoin("category as cat", "vc.category_id", "cat.id");
+      .innerJoin("category as cat", "vc.category_id", "cat.id")
+      .leftJoin(
+        db
+          .selectFrom(
+            db
+              .selectFrom("ner_prediction")
+              .select([
+                "video_id",
+                "entity_type",
+                sql`jsonb_agg(entity_value)`.as("entity_values")
+              ])
+              .groupBy(["video_id", "entity_type"])
+              .as("inner_agg")
+          )
+          .select([
+            "video_id",
+            sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")
+          ])
+          .groupBy("video_id")
+          .as("ner"), "listened.video_id", "ner.video_id");
 
     if (endDate) {
       query = query.where("listened_at", "<=", endDate);
@@ -58,13 +77,14 @@ export class UserQueries {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
-      .groupBy(["v.yt_id", "video_metadata.title", "c.name", "c.yt_id", "c.profile_picture_uri"])
+      .groupBy(["v.yt_id", "video_metadata.title", "c.name", "c.yt_id", "c.profile_picture_uri", "ner.ner_result"])
       .select(eb => [
         eb.ref("v.yt_id").as("video_id"),
         eb.ref("video_metadata.title").as("video_title"),
         eb.ref("c.name").as("artist_name"),
         eb.ref("c.yt_id").as("artist_id"),
         eb.ref("c.profile_picture_uri").as("artist_profile_picture_url"),
+        eb.ref("ner.ner_result").as("NER"),
         db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
@@ -77,6 +97,7 @@ export class UserQueries {
       artist_id: string;
       listen_count: number;
       artist_profile_picture_url: string | null;
+      NER: Record<string, string[] | null> | null;
     };
 
     return query.execute() as Promise<TopMusicRow[]>;
@@ -122,6 +143,25 @@ export class UserQueries {
         join.onRef("v.id", "=", "video_metadata.video_id").onRef("default_language", "=", "video_metadata.language"),
       )
       .innerJoin("channel as c", "v.channel_id", "c.id")
+      .leftJoin(
+        db
+          .selectFrom(
+            db
+              .selectFrom("ner_prediction")
+              .select([
+                "video_id",
+                "entity_type",
+                sql`jsonb_agg(entity_value)`.as("entity_values")
+              ])
+              .groupBy(["video_id", "entity_type"])
+              .as("inner_agg")
+          )
+          .select([
+            "video_id",
+            sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")
+          ])
+          .groupBy("video_id")
+          .as("ner"), "listened.video_id", "ner.video_id")
       .where("user_id", "=", user_id)
       .orderBy("listened.listened_at", "desc")
       .select(eb => [
@@ -129,6 +169,7 @@ export class UserQueries {
         eb.ref("video_metadata.title").as("video_title"),
         eb.ref("listened.listened_at").as("listened_at"),
         eb.ref("c.name").as("artist_name"),
+        eb.ref("ner_result").as("NER"),
       ])
       .limit(filters.limit ?? 100)
       .offset(filters.offset ?? 0)
