@@ -2,6 +2,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+if (!process.env.AI_MODEL_URL) {
+  throw new Error("AI_MODEL_URL is not defined in environment variables");
+}
+if (!process.env.AI_MODEL_URL_NER) {
+  throw new Error("AI_MODEL_URL_NER is not defined in environment variables");
+}
+
 import {setupAPIRoutes} from "./api/routes";
 import {DatabaseManager} from "./database";
 import {logger} from "./utils/logger";

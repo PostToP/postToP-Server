@@ -2,10 +2,11 @@ import { UserQueries } from "../database/queries/user.queries";
 import { VideoQueries } from "../database/queries/video.queries";
 import { ModelType } from "../model/db";
 import type { VideoID } from "../model/override";
+import { fetchJsonWithRetry } from "../utils/fetch";
 import { logger } from "../utils/logger";
 
-const AI_MODEL_URL = process.env.AI_MODEL_URL;
-const AI_MODEL_URL_NER = process.env.AI_MODEL_URL_NER;
+const AI_MODEL_URL = process.env.AI_MODEL_URL!;
+const AI_MODEL_URL_NER = process.env.AI_MODEL_URL_NER!;
 
 export class IsMusicAiService {
   private static async fetch(videoID: VideoID) {
@@ -16,18 +17,13 @@ export class IsMusicAiService {
       categories: data?.categories || [],
       duration: data?.duration,
     };
-    if (!AI_MODEL_URL) {
-      throw new Error("AI_MODEL_URL is not defined in environment variables");
-    }
-    const analysis = await fetch(AI_MODEL_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
 
-    const result = await analysis.json();
+    const res = await fetchJsonWithRetry<{ prediction: number; version: string }>(AI_MODEL_URL, { method: "POST", body });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch AI prediction: ${res.error}`);
+    }
+    const result = res.data;
+
     result.version = result.version.startsWith("v") ? result.version.slice(1) : result.version;
     return result as {
       prediction: number;
@@ -51,7 +47,6 @@ export class IsMusicAiService {
   }
 }
 
-
 export class NERAIService {
   private static async fetch(videoID: VideoID) {
     const data = await VideoQueries.fetchAiData(videoID);
@@ -59,18 +54,11 @@ export class NERAIService {
       title: data?.title,
       description: data?.description,
     };
-    if (!AI_MODEL_URL_NER) {
-      throw new Error("AI_MODEL_URL is not defined in environment variables");
+    const res = await fetchJsonWithRetry<{ entities: string[][]; result: Record<string, string[]> }>(AI_MODEL_URL_NER, { method: "POST", body });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch NER AI prediction: ${res.error}`);
     }
-    const analysis = await fetch(`${AI_MODEL_URL_NER}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    const result = await analysis.json();
+    const result = res.data;
 
     // TODO: remove this once the model is updated to return uppercase keys
     const uppercaseResult = {

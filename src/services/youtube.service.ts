@@ -1,44 +1,37 @@
-import type {YouTubeApiResponse, YoutubeChannelApiResponse} from "../interface/youtube";
+import type { YouTubeApiResponse, YoutubeChannelApiResponse } from "../interface/youtube";
+import { fetchJsonWithRetry } from "../utils/fetch";
 
 const YT_API_BASE_URL = "https://youtube.googleapis.com/youtube/v3";
 
 export class YouTubeService {
   static async fetchVideoDetails(videoId: string): Promise<YouTubeApiResponse> {
     const baseUrl = `${YT_API_BASE_URL}/videos`;
-    const params = new URLSearchParams({
-      part: "snippet,topicDetails,localizations,contentDetails",
-      id: videoId,
-      key: process.env.YT_API_KEY || "",
+    const res = await fetchJsonWithRetry<YouTubeApiResponse>(baseUrl, {
+      params: {
+        part: "snippet,topicDetails,localizations,contentDetails",
+        id: videoId,
+        key: process.env.YT_API_KEY || "",
+      }
     });
-    const url = `${baseUrl}?${params.toString()}`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = (await response.json()) as YouTubeApiResponse;
-      return data;
-    } catch (error) {
-      throw new Error(`Failed to fetch YouTube video details: ${error}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch YouTube video details: ${res.error}`);
     }
+    return res.data;
   }
 
   static async fetchArtistChannelDetails(channelId: string): Promise<YoutubeChannelApiResponse> {
     const baseUrl = `${YT_API_BASE_URL}/channels`;
-    const params = new URLSearchParams({
-      part: "snippet,topicDetails,contentDetails",
-      id: channelId,
-      key: process.env.YT_API_KEY || "",
+    const res = await fetchJsonWithRetry<YoutubeChannelApiResponse>(baseUrl, {
+      params: {
+        part: "snippet,topicDetails,contentDetails",
+        id: channelId,
+        key: process.env.YT_API_KEY || "",
+      }
     });
-    const url = `${baseUrl}?${params.toString()}`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-      const data = (await response.json()) as YoutubeChannelApiResponse;
-      return data;
-    } catch (error) {
-      throw new Error(`Failed to fetch YouTube channel details: ${error}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch YouTube channel details: ${res.error}`);
     }
+    return res.data;
   }
 
   static convertDetails(details: YouTubeApiResponse) {
