@@ -1,7 +1,7 @@
-import type { Request, Response } from "express";
-import { z } from "zod";
-import { ReviewService } from "../../services/review.service";
-import type { AuthenticatedRequest } from "../../types/express";
+import type {Request, Response} from "express";
+import {z} from "zod";
+import {ReviewService} from "../../services/review.service";
+import type {AuthenticatedRequest} from "../../types/express";
 
 const IsMusicReviewSchema = z.object({
   watchID: z.string().min(1),
@@ -11,10 +11,10 @@ const IsMusicReviewSchema = z.object({
 export async function postIsMusicReviewRequestHandler(req: Request, res: Response) {
   const userReq = req as AuthenticatedRequest;
   const userID = userReq.userID;
-  const { watchID, is_music } = IsMusicReviewSchema.parse(req.body);
+  const {watchID, is_music} = IsMusicReviewSchema.parse(req.body);
 
   await ReviewService.addIsMusicReview(watchID, userID, is_music);
-  return res.status(200).json({ message: "Review added successfully" });
+  return res.status(200).json({message: "Review added successfully"});
 }
 
 const NERReviewSchema = z.object({
@@ -35,12 +35,11 @@ export async function postNERReviewRequestHandler(req: Request, res: Response) {
   const userID = userReq.userID;
 
   // const { watchID, language, namedEntities } = NERReviewSchema.parse(req.body);
-  const { watchID, language, namedEntities } = req.body;
+  const {watchID, language, namedEntities} = req.body;
 
   await ReviewService.addNERReview(watchID, userID, language, namedEntities);
-  return res.status(200).json({ message: "NER Review added successfully" });
+  return res.status(200).json({message: "NER Review added successfully"});
 }
-
 
 const GenreReviewSchema = z.object({
   watchID: z.string().min(1),
@@ -51,8 +50,8 @@ export async function postGenreReviewRequestHandler(req: Request, res: Response)
   const userReq = req as AuthenticatedRequest;
   const userID = userReq.userID;
 
-  const { watchID, genres } = GenreReviewSchema.parse(req.body);
+  const {watchID, genres} = GenreReviewSchema.parse(req.body);
 
   await ReviewService.addGenreReview(watchID, userID, genres);
-  return res.status(200).json({ message: "Genre Review added successfully" });
+  return res.status(200).json({message: "Genre Review added successfully"});
 }

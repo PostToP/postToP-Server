@@ -1,4 +1,4 @@
-import { VideoQueries } from "../database/queries/video.queries";
+import {VideoQueries} from "../database/queries/video.queries";
 
 export class ReviewService {
   static async addIsMusicReview(videoID: string, userID: number, is_music: boolean) {
@@ -14,7 +14,7 @@ export class ReviewService {
     videoID: string,
     userID: number,
     language: string,
-    namedEntities: { NER: string; text: string; start: number; end: number }[],
+    namedEntities: {NER: string; text: string; start: number; end: number}[],
   ) {
     const db_id = await VideoQueries.fetch(videoID);
     if (!db_id) {

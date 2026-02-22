@@ -1,10 +1,10 @@
-import { DatabaseManager } from "../database";
-import { ArtistQueries } from "../database/queries/artist.queries";
-import { CategoryQueries } from "../database/queries/genre.queries";
-import { type QueryForAllParams, VideoQueries } from "../database/queries/video.queries";
-import type { YouTubeApiResponse } from "../interface/youtube";
-import { ChannelService } from "./channel.service";
-import { YouTubeService } from "./youtube.service";
+import {DatabaseManager} from "../database";
+import {ArtistQueries} from "../database/queries/artist.queries";
+import {CategoryQueries} from "../database/queries/genre.queries";
+import {type QueryForAllParams, VideoQueries} from "../database/queries/video.queries";
+import type {YouTubeApiResponse} from "../interface/youtube";
+import {ChannelService} from "./channel.service";
+import {YouTubeService} from "./youtube.service";
 
 export class VideoService {
   static async getOrFetch(watchID: string) {
@@ -54,15 +54,25 @@ export class VideoService {
       }
       const promises = [];
       const categoriesID = await CategoryQueries.insert(trx, data.topicCategories);
-      promises.push(CategoryQueries.insertToVideo(
-        trx,
-        videoID.id,
-        categoriesID.map(i => i.id),
-      ));
+      promises.push(
+        CategoryQueries.insertToVideo(
+          trx,
+          videoID.id,
+          categoriesID.map(i => i.id),
+        ),
+      );
       promises.push(VideoQueries.insertMetadata(trx, videoID.id, defaultLanguage, data.title, data.description));
       for (const [lang, localization] of Object.entries(data.localizations)) {
         if (lang === defaultLanguage) continue;
-        promises.push(VideoQueries.insertMetadata(trx, videoID.id, lang, localization.title ?? data.title, localization.description));
+        promises.push(
+          VideoQueries.insertMetadata(
+            trx,
+            videoID.id,
+            lang,
+            localization.title ?? data.title,
+            localization.description,
+          ),
+        );
       }
       await Promise.all(promises);
       return videoID.id;

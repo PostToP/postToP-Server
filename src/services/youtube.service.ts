@@ -1,5 +1,5 @@
-import type { YouTubeApiResponse, YoutubeChannelApiResponse } from "../interface/youtube";
-import { fetchJsonWithRetry } from "../utils/fetch";
+import type {YouTubeApiResponse, YoutubeChannelApiResponse} from "../interface/youtube";
+import {fetchJsonWithRetry} from "../utils/fetch";
 
 const YT_API_BASE_URL = "https://youtube.googleapis.com/youtube/v3";
 
@@ -11,7 +11,7 @@ export class YouTubeService {
         part: "snippet,topicDetails,localizations,contentDetails",
         id: videoId,
         key: process.env.YT_API_KEY || "",
-      }
+      },
     });
     if (!res.ok) {
       throw new Error(`Failed to fetch YouTube video details: ${res.error}`);
@@ -26,7 +26,7 @@ export class YouTubeService {
         part: "snippet,topicDetails,contentDetails",
         id: channelId,
         key: process.env.YT_API_KEY || "",
-      }
+      },
     });
     if (!res.ok) {
       throw new Error(`Failed to fetch YouTube channel details: ${res.error}`);

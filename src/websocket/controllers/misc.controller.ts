@@ -1,15 +1,15 @@
-import { WebSocket } from "ws";
-import { wssServer } from "..";
-import { UserQueries } from "../../database/queries/user.queries";
-import { type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase } from "../../interface/websocket";
-import { logger } from "../../utils/logger";
+import {WebSocket} from "ws";
+import {UserQueries} from "../../database/queries/user.queries";
+import {type ExtendedWebSocketConnection, ResponseOperationType, WebSocketPhase} from "../../interface/websocket";
+import {logger} from "../../utils/logger";
+import {wssServer} from "..";
 
 export function heartbeatWebsocketHandler(ws: ExtendedWebSocketConnection, _data: any) {
   if (!ws.authenticated || ws.userId === undefined) {
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "User not authenticated" },
+        d: {message: "User not authenticated"},
       }),
     );
     return;
@@ -59,13 +59,12 @@ export function announceSongToEvedroppers(userID: number) {
     client.send(
       JSON.stringify({
         op: ResponseOperationType.VIDEO_UPDATE,
-        d: data
+        d: data,
       }),
     );
   }
   logger.info(`Announced song update by user ${userID} to eavesdroppers`);
 }
-
 
 export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection, data: any) {
   clearTimeout(ws.disconnectTimeout);
@@ -75,7 +74,7 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.ERROR,
-        d: { message: "User not found" },
+        d: {message: "User not found"},
       }),
     );
     logger.error(`Eavesdrop attempt failed for handle ${data.handle}: User not found`);
@@ -87,7 +86,7 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.EAVESDROPPED,
-      d: { message: "Eavesdropping started" },
+      d: {message: "Eavesdropping started"},
     }),
   );
   const originalWS = Array.from(wssServer.clients).find(client => {

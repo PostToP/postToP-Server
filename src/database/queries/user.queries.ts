@@ -1,6 +1,6 @@
-import { sql } from "kysely";
-import { DatabaseManager } from "..";
-import type { ModelType } from "../../model/db";
+import {sql} from "kysely";
+import {DatabaseManager} from "..";
+import type {ModelType} from "../../model/db";
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
@@ -26,7 +26,7 @@ export class UserQueries {
 
   static async insert(username: string, mail: string, password_hash: string) {
     const db = DatabaseManager.getInstance();
-    return db.insertInto("user").values({ username, password_hash, mail }).returningAll().executeTakeFirst();
+    return db.insertInto("user").values({username, password_hash, mail}).returningAll().executeTakeFirst();
   }
 
   private static getListenedAll(user_id: number, startDate?: Date, endDate?: Date) {
@@ -46,20 +46,16 @@ export class UserQueries {
           .selectFrom(
             db
               .selectFrom("ner_prediction")
-              .select([
-                "video_id",
-                "entity_type",
-                sql`jsonb_agg(entity_value)`.as("entity_values")
-              ])
+              .select(["video_id", "entity_type", sql`jsonb_agg(entity_value)`.as("entity_values")])
               .groupBy(["video_id", "entity_type"])
-              .as("inner_agg")
+              .as("inner_agg"),
           )
-          .select([
-            "video_id",
-            sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")
-          ])
+          .select(["video_id", sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")])
           .groupBy("video_id")
-          .as("ner"), "listened.video_id", "ner.video_id");
+          .as("ner"),
+        "listened.video_id",
+        "ner.video_id",
+      );
 
     if (endDate) {
       query = query.where("listened_at", "<=", endDate);
@@ -134,7 +130,7 @@ export class UserQueries {
     return query.execute();
   }
 
-  static async getUserHistory(user_id: number, filters: Partial<{ limit: number; offset: number }> = {}) {
+  static async getUserHistory(user_id: number, filters: Partial<{limit: number; offset: number}> = {}) {
     const db = DatabaseManager.getInstance();
     return db
       .selectFrom("listened")
@@ -148,20 +144,16 @@ export class UserQueries {
           .selectFrom(
             db
               .selectFrom("ner_prediction")
-              .select([
-                "video_id",
-                "entity_type",
-                sql`jsonb_agg(entity_value)`.as("entity_values")
-              ])
+              .select(["video_id", "entity_type", sql`jsonb_agg(entity_value)`.as("entity_values")])
               .groupBy(["video_id", "entity_type"])
-              .as("inner_agg")
+              .as("inner_agg"),
           )
-          .select([
-            "video_id",
-            sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")
-          ])
+          .select(["video_id", sql`jsonb_object_agg(entity_type, entity_values)`.as("ner_result")])
           .groupBy("video_id")
-          .as("ner"), "listened.video_id", "ner.video_id")
+          .as("ner"),
+        "listened.video_id",
+        "ner.video_id",
+      )
       .where("user_id", "=", user_id)
       .orderBy("listened.listened_at", "desc")
       .select(eb => [
@@ -176,7 +168,7 @@ export class UserQueries {
       .execute();
   }
 
-  static async getUserTotalSeconds(user_id: number, filters?: Partial<{ startDate: Date; endDate: Date }>) {
+  static async getUserTotalSeconds(user_id: number, filters?: Partial<{startDate: Date; endDate: Date}>) {
     const db = DatabaseManager.getInstance();
     let query = db
       .selectFrom("listened")
@@ -197,7 +189,7 @@ export class UserQueries {
     return resultRow?.total_seconds ?? 0;
   }
 
-  static async getUserListenSegments(user_id: number, filters?: Partial<{ startDate: Date; endDate: Date }>) {
+  static async getUserListenSegments(user_id: number, filters?: Partial<{startDate: Date; endDate: Date}>) {
     const db = DatabaseManager.getInstance();
     let query = db
       .selectFrom("listened")

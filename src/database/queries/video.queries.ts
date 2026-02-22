@@ -1,7 +1,7 @@
-import { type Transaction, sql } from "kysely";
-import { DatabaseManager } from "..";
-import { DB, EntityType, ModelType } from "../../model/db";
-import type { ChannelID, VideoID, VideoYTID } from "../../model/override";
+import {type Transaction, sql} from "kysely";
+import {DatabaseManager} from "..";
+import {DB, EntityType, ModelType} from "../../model/db";
+import type {ChannelID, VideoID, VideoYTID} from "../../model/override";
 
 export interface QueryForAllParams {
   limit?: number;
@@ -79,7 +79,7 @@ export class VideoQueries {
   static async insertMetadata(trx: Transaction<DB>, id: VideoID, language: string, title: string, description: string) {
     return trx
       .insertInto("video_metadata")
-      .values({ video_id: id, language, title, description })
+      .values({video_id: id, language, title, description})
       .onConflict(oc => oc.doNothing())
       .execute();
   }
@@ -110,10 +110,7 @@ export class VideoQueries {
       .where(
         "submitted_by_id",
         "in",
-        db
-          .selectFrom("model")
-          .select("model.id")
-          .where("model.type", "=", ModelType.IS_MUSIC_CLASSIFIER),
+        db.selectFrom("model").select("model.id").where("model.type", "=", ModelType.IS_MUSIC_CLASSIFIER),
       )
       .selectAll()
       .executeTakeFirst();
@@ -256,10 +253,7 @@ export class VideoQueries {
       .leftJoin("is_music_video", "video.id", "is_music_video.video_id")
       .leftJoin("is_music_video_prediction", "video.id", "is_music_video_prediction.video_id")
       .where(eb =>
-        eb.or([
-          eb("is_music_video.is_music", "=", true),
-          eb("is_music_video_prediction.is_music", "=", true),
-        ]),
+        eb.or([eb("is_music_video.is_music", "=", true), eb("is_music_video_prediction.is_music", "=", true)]),
       )
       .select(_eb => [sql`count(distinct video.id)`.as("total_count")])
       .executeTakeFirstOrThrow();
@@ -270,7 +264,7 @@ export class VideoQueries {
     videoID: VideoID,
     userID: number,
     language: any,
-    namedEntities: { NER: string; text: string; start: number; end: number }[],
+    namedEntities: {NER: string; text: string; start: number; end: number}[],
   ) {
     console.log("Inserting NER review", videoID, userID, language, JSON.stringify(namedEntities));
     const db = DatabaseManager.getInstance();
@@ -302,11 +296,7 @@ export class VideoQueries {
 
   static async fetchNERByAI(videoID: VideoID) {
     const db = DatabaseManager.getInstance();
-    const res = await db
-      .selectFrom("ner_prediction")
-      .where("video_id", "=", videoID)
-      .selectAll()
-      .execute();
+    const res = await db.selectFrom("ner_prediction").where("video_id", "=", videoID).selectAll().execute();
 
     if (res.length === 0) {
       return null;
@@ -322,7 +312,7 @@ export class VideoQueries {
       VOCALIST: [] as string[],
       ALT_TITLE: [] as string[],
       ALBUM: [] as string[],
-    }
+    };
     res.forEach(r => {
       res2[r.entity_type as keyof typeof res2].push(r.entity_value);
     });
@@ -330,17 +320,21 @@ export class VideoQueries {
     return res2;
   }
 
-  static async insertNERByAI(videoID: VideoID, modelID: number, nerResult: {
-    ORIGINAL_AUTHOR: string[];
-    TITLE: string[];
-    FEATURING: string[];
-    MODIFIER: string[];
-    VOCALOID: string[];
-    MISC_PERSON: string[];
-    VOCALIST: string[];
-    ALT_TITLE: string[];
-    ALBUM: string[];
-  }) {
+  static async insertNERByAI(
+    videoID: VideoID,
+    modelID: number,
+    nerResult: {
+      ORIGINAL_AUTHOR: string[];
+      TITLE: string[];
+      FEATURING: string[];
+      MODIFIER: string[];
+      VOCALOID: string[];
+      MISC_PERSON: string[];
+      VOCALIST: string[];
+      ALT_TITLE: string[];
+      ALBUM: string[];
+    },
+  ) {
     const db = DatabaseManager.getInstance();
     const entries = [] as {
       video_id: VideoID;
@@ -359,6 +353,10 @@ export class VideoQueries {
         });
       }
     }
-    return db.insertInto("ner_prediction").values(entries).onConflict(oc => oc.doNothing()).execute();
+    return db
+      .insertInto("ner_prediction")
+      .values(entries)
+      .onConflict(oc => oc.doNothing())
+      .execute();
   }
 }

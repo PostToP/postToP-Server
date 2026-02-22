@@ -1,5 +1,5 @@
-import { UserQueries } from "../database/queries/user.queries";
-import { InvalidUserError } from "../interface/errors";
+import {UserQueries} from "../database/queries/user.queries";
+import {InvalidUserError} from "../interface/errors";
 
 export class UserService {
   static async getUserInfo(userHandle: string) {
@@ -12,7 +12,7 @@ export class UserService {
     };
   }
 
-  static async getUserHistory(userHandle: string, filters: Partial<{ limit: number; offset: number }>) {
+  static async getUserHistory(userHandle: string, filters: Partial<{limit: number; offset: number}>) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
     return UserQueries.getUserHistory(user.id, filters);
@@ -47,7 +47,7 @@ export class UserService {
     return UserQueries.getTopGenres(user.id, startDate, endDate);
   }
 
-  static async getUserStats(userHandle: string, filters: Partial<{ startDate: Date; endDate: Date }>) {
+  static async getUserStats(userHandle: string, filters: Partial<{startDate: Date; endDate: Date}>) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
     const data = Promise.all([

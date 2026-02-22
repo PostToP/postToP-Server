@@ -1,9 +1,9 @@
-import { UserQueries } from "../database/queries/user.queries";
-import { VideoQueries } from "../database/queries/video.queries";
-import { ModelType } from "../model/db";
-import type { VideoID } from "../model/override";
-import { fetchJsonWithRetry } from "../utils/fetch";
-import { logger } from "../utils/logger";
+import {UserQueries} from "../database/queries/user.queries";
+import {VideoQueries} from "../database/queries/video.queries";
+import {ModelType} from "../model/db";
+import type {VideoID} from "../model/override";
+import {fetchJsonWithRetry} from "../utils/fetch";
+import {logger} from "../utils/logger";
 
 const AI_MODEL_URL = process.env.AI_MODEL_URL!;
 const AI_MODEL_URL_NER = process.env.AI_MODEL_URL_NER!;
@@ -18,7 +18,7 @@ export class IsMusicAiService {
       duration: data?.duration,
     };
 
-    const res = await fetchJsonWithRetry<{ prediction: number; version: string }>(AI_MODEL_URL, { method: "POST", body });
+    const res = await fetchJsonWithRetry<{prediction: number; version: string}>(AI_MODEL_URL, {method: "POST", body});
     if (!res.ok) {
       throw new Error(`Failed to fetch AI prediction: ${res.error}`);
     }
@@ -54,7 +54,10 @@ export class NERAIService {
       title: data?.title,
       description: data?.description,
     };
-    const res = await fetchJsonWithRetry<{ entities: string[][]; result: Record<string, string[]> }>(AI_MODEL_URL_NER, { method: "POST", body });
+    const res = await fetchJsonWithRetry<{entities: string[][]; result: Record<string, string[]>}>(AI_MODEL_URL_NER, {
+      method: "POST",
+      body,
+    });
     if (!res.ok) {
       throw new Error(`Failed to fetch NER AI prediction: ${res.error}`);
     }
@@ -66,7 +69,7 @@ export class NERAIService {
       result: Object.keys(result.result || {}).reduce((acc: any, key: string) => {
         acc[key.toUpperCase()] = result.result[key];
         return acc;
-      }, {})
+      }, {}),
     };
 
     if (uppercaseResult.result.ORIGINAL_AUTHORS) {
@@ -92,9 +95,8 @@ export class NERAIService {
         ALT_TITLE: string[];
         ALBUM: string[];
       };
-    }
+    };
   }
-
 
   static async getOrFetch(videoID: VideoID) {
     const ner_ai = await VideoQueries.fetchNERByAI(videoID);
