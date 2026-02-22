@@ -31,10 +31,17 @@ export function announceSongToEvedroppers(userID: number) {
   }) as ExtendedWebSocketConnection | undefined;
 
   let data;
-  if (originalWS === undefined || originalWS.currentlyPlayingData === undefined || originalWS.currentlyPlayingData.video.isMusic.is_music === false) {
+  if (
+    originalWS === undefined ||
+    originalWS.currentlyPlayingData === undefined ||
+    originalWS.currentlyPlayingData.video.isMusic === undefined ||
+    originalWS.currentlyPlayingData.video.isMusic.is_music === false
+  ) {
     data = {
-      userId: userID, video: null, listeningData: null
-    }
+      userId: userID,
+      video: null,
+      listeningData: null,
+    };
   } else {
     data = {
       userId: userID,
@@ -88,7 +95,11 @@ export async function eavesdropWebsocketHandler(ws: ExtendedWebSocketConnection,
     return eClient.userId === ws.userId && eClient.phase === WebSocketPhase.CONNECTED && eClient.authenticated;
   }) as ExtendedWebSocketConnection | undefined;
   if (!originalWS?.currentlyPlayingData) return;
-  if (originalWS.currentlyPlayingData.video.isMusic.is_music === false) return;
+  if (
+    originalWS.currentlyPlayingData.video.isMusic === undefined ||
+    originalWS.currentlyPlayingData.video.isMusic.is_music === false
+  )
+    return;
   ws.send(
     JSON.stringify({
       op: ResponseOperationType.VIDEO_UPDATE,

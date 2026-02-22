@@ -61,11 +61,11 @@ export interface VideoResponseData extends WebsocketData {
   };
   duration: number;
   coverImage: string;
-  isMusic: {
+  isMusic?: {
     is_music: boolean;
     reviewed: boolean;
   };
-  NER: any[] | null;
+  NER?: any[];
 }
 
 export interface ListeningData extends WebsocketData {

@@ -31,7 +31,8 @@ export function videoUpdateWebsocketHandler(ws: ExtendedWebSocketConnection, dat
       break;
     case VideoStatus.PLAYING:
     case VideoStatus.PAUSED:
-      if (ws.currentlyPlayingData === undefined) return
+      if (ws.currentlyPlayingData === undefined) return;
+      if (ws.currentlyPlayingData.video.isMusic === undefined) return;
       if (ws.currentlyPlayingData.video.isMusic.is_music === false) return;
       ws.currentlyPlayingData.listeningData.currentTime = data.currentTime;
       ws.currentlyPlayingData.listeningData.status = data.status;
@@ -107,12 +108,6 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     return;
   }
   const videoID = await VideoService.getOrFetch(data.watchID);
-  const isMusic = await MusicService.getVideoIsMusic(videoID);
-
-  let NER = null;
-  if (isMusic.is_music) {
-    NER = await MusicService.getEntitiesInMusic(videoID);
-  }
   const videoData = await VideoQueries.fetchDataAll(videoID);
 
   if (!videoData) {
@@ -128,8 +123,8 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     },
     duration: videoData.duration,
     coverImage: `https://i.ytimg.com/vi/${data.watchID}/hqdefault.jpg`,
-    isMusic: isMusic,
-    NER: NER as any,
+    // isMusic: isMusic,
+    // NER: NER as any,
   };
 
   ws.send(
@@ -141,6 +136,39 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     }),
   );
   logger.info(`User ${ws.userId} started listening to music successfully`);
+
+  const isMusic = await MusicService.getVideoIsMusic(videoID);
+  responseVideo.isMusic = {
+    is_music: isMusic.is_music,
+    reviewed: isMusic.reviewed,
+  };
+
+  ws.send(
+    JSON.stringify({
+      op: ResponseOperationType.VIDEO_UPDATE,
+      d: {
+        video: {
+          ...responseVideo,
+        },
+      },
+    }),
+  );
+
+  let NER = null;
+  if (isMusic.is_music) {
+    NER = await MusicService.getEntitiesInMusic(videoID);
+    responseVideo.NER = NER as any;
+    ws.send(
+      JSON.stringify({
+        op: ResponseOperationType.VIDEO_UPDATE,
+        d: {
+          video: {
+            ...responseVideo,
+          },
+        },
+      }),
+    );
+  }
 
   const listeningData: ListeningData = {
     currentTime: data.currentTime,
