@@ -54,7 +54,10 @@ export class NERAIService {
       title: data?.title,
       description: data?.description,
     };
-    const res = await fetchJsonWithRetry<{entities: string[][]; result: Record<string, string[]>}>(AI_MODEL_URL_NER, {
+    const res = await fetchJsonWithRetry<{
+      prediction: {entities: string[][]; result: Record<string, string[]>};
+      version: string;
+    }>(AI_MODEL_URL_NER, {
       method: "POST",
       body,
     });
@@ -63,38 +66,22 @@ export class NERAIService {
     }
     const result = res.data;
 
-    // TODO: remove this once the model is updated to return uppercase keys
-    const uppercaseResult = {
-      entities: result.entities,
-      result: Object.keys(result.result || {}).reduce((acc: any, key: string) => {
-        acc[key.toUpperCase()] = result.result[key];
-        return acc;
-      }, {}),
-    };
-
-    if (uppercaseResult.result.ORIGINAL_AUTHORS) {
-      uppercaseResult.result.ORIGINAL_AUTHOR = uppercaseResult.result.ORIGINAL_AUTHORS;
-      delete uppercaseResult.result.ORIGINAL_AUTHORS;
-    }
-
-    if (uppercaseResult.result.PERFORMER) {
-      uppercaseResult.result.VOCALIST = uppercaseResult.result.PERFORMER;
-      delete uppercaseResult.result.PERFORMER;
-    }
-
-    return uppercaseResult as {
-      entities: string[][];
-      result: {
-        ORIGINAL_AUTHOR: string[];
-        TITLE: string[];
-        FEATURING: string[];
-        MODIFIER: string[];
-        VOCALOID: string[];
-        MISC_PERSON: string[];
-        VOCALIST: string[];
-        ALT_TITLE: string[];
-        ALBUM: string[];
+    return result as {
+      prediction: {
+        entities: string[][];
+        result: {
+          ORIGINAL_AUTHOR: string[];
+          TITLE: string[];
+          FEATURING: string[];
+          MODIFIER: string[];
+          VOCALOID: string[];
+          MISC_PERSON: string[];
+          VOCALIST: string[];
+          ALT_TITLE: string[];
+          ALBUM: string[];
+        };
       };
+      version: string;
     };
   }
 
@@ -106,11 +93,11 @@ export class NERAIService {
     }
     logger.info(`NER AI data for video ${videoID} not found in database, fetching from AI model`);
     const currentResponse = await NERAIService.fetch(videoID);
-    const aiUserID = await UserQueries.fetchAI(ModelType.NER, "v1");
+    const aiUserID = await UserQueries.fetchAI(ModelType.NER, currentResponse.version);
     if (!aiUserID) {
       throw new Error("AI user not found");
     }
-    await VideoQueries.insertNERByAI(videoID, aiUserID?.id, currentResponse.result);
-    return currentResponse.result;
+    await VideoQueries.insertNERByAI(videoID, aiUserID?.id, currentResponse.prediction.result);
+    return currentResponse.prediction.result;
   }
 }
