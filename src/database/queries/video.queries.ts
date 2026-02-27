@@ -1,7 +1,7 @@
-import {type Transaction, sql} from "kysely";
-import {DatabaseManager} from "..";
-import {DB, EntityType, ModelType} from "../../model/db";
+import {sql, type Transaction} from "kysely";
+import {type DB, type EntityType, ModelType} from "../../model/db";
 import type {ChannelID, VideoID, VideoYTID} from "../../model/override";
+import {DatabaseManager} from "..";
 
 export interface QueryForAllParams {
   limit?: number;
@@ -56,12 +56,6 @@ export class VideoQueries {
     main_category_id: number,
     default_language: string,
   ) {
-    const exists = await trx.selectFrom("video").select("id").where("yt_id", "=", videoID).executeTakeFirst();
-
-    if (exists) {
-      return exists;
-    }
-
     return trx
       .insertInto("video")
       .values({
@@ -71,7 +65,7 @@ export class VideoQueries {
         main_category_id: main_category_id,
         default_language: default_language,
       })
-      .onConflict(oc => oc.doNothing())
+      .onConflict(oc => oc.column("yt_id").doUpdateSet({yt_id: videoID}))
       .returning("id")
       .executeTakeFirst();
   }
