@@ -17,6 +17,15 @@ export async function postIsMusicReviewRequestHandler(req: Request, res: Respons
   return res.status(200).json({message: "Review added successfully"});
 }
 
+export async function deleteIsMusicReviewRequestHandler(req: Request, res: Response) {
+  const userReq = req as AuthenticatedRequest;
+  const userID = userReq.userID;
+  const {watchID} = IsMusicReviewSchema.parse(req.body);
+
+  await ReviewService.removeIsMusicReview(watchID, userID);
+  return res.status(200).json({message: "Review removed successfully"});
+}
+
 const NERReviewSchema = z.object({
   watchID: z.string().min(1),
   language: z.string().min(1),

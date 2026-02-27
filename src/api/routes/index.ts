@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import {swaggerSpec} from "../../utils/swagger";
 import {authRequestHandler, registerRequestHandler} from "../controllers/auth.controller";
 import {
+  deleteIsMusicReviewRequestHandler,
   postGenreReviewRequestHandler,
   postIsMusicReviewRequestHandler,
   postNERReviewRequestHandler,
@@ -39,6 +40,7 @@ export function setupAPIRoutes() {
   app.post("/auth", authRequestHandler);
   app.post("/register", registerRequestHandler);
   app.post("/review/music", authMiddleware, postIsMusicReviewRequestHandler);
+  app.delete("/review/music", authMiddleware, deleteIsMusicReviewRequestHandler);
   app.post("/review/ner", authMiddleware, postNERReviewRequestHandler);
   app.post("/review/genre", authMiddleware, postGenreReviewRequestHandler);
   app.get("/user/:handle/top", getUserStatisticsController);

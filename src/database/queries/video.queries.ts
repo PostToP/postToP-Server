@@ -123,6 +123,15 @@ export class VideoQueries {
       .execute();
   }
 
+  static async removeIsMusicByUser(videoID: VideoID, userID: number) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .deleteFrom("is_music_video")
+      .where("video_id", "=", videoID)
+      .where("submitted_by_id", "=", userID)
+      .execute();
+  }
+
   static async insertIsMusicByAI(videoID: VideoID, modelID: number, is_music: boolean) {
     const db = DatabaseManager.getInstance();
     return db

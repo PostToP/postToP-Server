@@ -10,6 +10,14 @@ export class ReviewService {
     return review;
   }
 
+  static async removeIsMusicReview(videoID: string, userID: number) {
+    const db_id = await VideoQueries.fetch(videoID);
+    if (!db_id) {
+      throw new Error("Video not found");
+    }
+    await VideoQueries.removeIsMusicByUser(db_id.id, userID);
+  }
+
   static async addNERReview(
     videoID: string,
     userID: number,
