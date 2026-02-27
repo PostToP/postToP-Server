@@ -64,6 +64,7 @@ export interface VideoResponseData extends WebsocketData {
   isMusic?: {
     is_music: boolean;
     reviewed: boolean;
+    user_submission: boolean | null;
   };
   NER?: any[];
 }

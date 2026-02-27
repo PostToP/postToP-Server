@@ -78,6 +78,16 @@ export class VideoQueries {
       .execute();
   }
 
+  static async fetchIsMusicByUser(videoID: VideoID, userID: number) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .selectFrom("is_music_video")
+      .where("video_id", "=", videoID)
+      .where("submitted_by_id", "=", userID)
+      .selectAll()
+      .executeTakeFirst();
+  }
+
   static async fetchIsMusicByAdmin(videoID: VideoID) {
     const db = DatabaseManager.getInstance();
     return db

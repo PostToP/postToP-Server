@@ -138,9 +138,11 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
   logger.info(`User ${ws.userId} started listening to music successfully`);
 
   const isMusic = await MusicService.getVideoIsMusic(videoID);
+  const userSubmittedIsMusic = await VideoQueries.fetchIsMusicByUser(videoID, ws.userId);
   responseVideo.isMusic = {
     is_music: isMusic.is_music,
     reviewed: isMusic.reviewed,
+    user_submission: userSubmittedIsMusic ? userSubmittedIsMusic.is_music : null,
   };
 
   ws.send(
@@ -187,6 +189,9 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     logger.error("ws.userId is undefined in startedListeningToMusicWebsocketHandler");
     return;
   }
+
+  // remove sensitive data before sending to eavesdroppers
+  responseVideo.isMusic.user_submission = null;
 
   announceSongToEvedroppers(ws.userId);
 }
