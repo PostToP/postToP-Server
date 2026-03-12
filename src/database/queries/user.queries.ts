@@ -1,6 +1,6 @@
 import {sql} from "kysely";
-import {DatabaseManager} from "..";
 import type {ModelType} from "../../model/db";
+import {DatabaseManager} from "..";
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
@@ -69,7 +69,7 @@ export class UserQueries {
     return query;
   }
 
-  static async getTopMusic(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopMusic(user_id: number, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
@@ -84,7 +84,8 @@ export class UserQueries {
         db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
-      .limit(10);
+      .limit(limit ?? 10)
+      .offset(offset ?? 0);
 
     type TopMusicRow = {
       video_id: string;
@@ -99,7 +100,7 @@ export class UserQueries {
     return query.execute() as Promise<TopMusicRow[]>;
   }
 
-  static async getTopArtists(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopArtists(user_id: number, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
@@ -111,11 +112,13 @@ export class UserQueries {
         db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
-      .limit(10);
+      .limit(limit ?? 10)
+      .offset(offset ?? 0);
+
     return query.execute();
   }
 
-  static async getTopGenres(user_id: number, startDate?: Date, endDate?: Date) {
+  static async getTopGenres(user_id: number, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     // TODO: with new category system
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
@@ -126,7 +129,9 @@ export class UserQueries {
         db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
-      .limit(10);
+      .limit(limit ?? 10)
+      .offset(offset ?? 0);
+
     return query.execute();
   }
 

@@ -18,10 +18,10 @@ export class UserService {
     return UserQueries.getUserHistory(user.id, filters);
   }
 
-  static async getTopMusic(userHandle: string, startDate?: Date, endDate?: Date) {
+  static async getTopMusic(userHandle: string, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    const rows = await UserQueries.getTopMusic(user.id, startDate, endDate);
+    const rows = await UserQueries.getTopMusic(user.id, startDate, endDate, limit, offset);
     return rows.map(row => ({
       yt_id: row.video_id,
       video_title: row.video_title,
@@ -35,16 +35,16 @@ export class UserService {
     }));
   }
 
-  static async getTopArtists(userHandle: string, startDate?: Date, endDate?: Date) {
+  static async getTopArtists(userHandle: string, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    return UserQueries.getTopArtists(user.id, startDate, endDate);
+    return UserQueries.getTopArtists(user.id, startDate, endDate, limit, offset);
   }
 
-  static async getTopGenres(userHandle: string, startDate?: Date, endDate?: Date) {
+  static async getTopGenres(userHandle: string, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
     if (!user) throw new InvalidUserError("User not found");
-    return UserQueries.getTopGenres(user.id, startDate, endDate);
+    return UserQueries.getTopGenres(user.id, startDate, endDate, limit, offset);
   }
 
   static async getUserStats(userHandle: string, filters: Partial<{startDate: Date; endDate: Date}>) {
