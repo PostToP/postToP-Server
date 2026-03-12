@@ -45,6 +45,10 @@ export class IsMusicAiService {
     await VideoQueries.insertIsMusicByAI(videoID, aiUserID?.id, is_music);
     return is_music;
   }
+
+  static async fetchPrediction(videoID: VideoID) {
+    return this.fetch(videoID);
+  }
 }
 
 export class NERAIService {
@@ -99,5 +103,9 @@ export class NERAIService {
     }
     await VideoQueries.insertNERByAI(videoID, aiUserID?.id, currentResponse.prediction.result);
     return currentResponse.prediction.result;
+  }
+
+  static async fetchPrediction(videoID: VideoID) {
+    return this.fetch(videoID);
   }
 }

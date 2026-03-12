@@ -4,6 +4,7 @@ import express from "express";
 import "express-async-errors";
 import swaggerUi from "swagger-ui-express";
 import {swaggerSpec} from "../../utils/swagger";
+import {getIsMusicAiProxyController, getNERAIProxyController} from "../controllers/ai.controller";
 import {authRequestHandler, registerRequestHandler} from "../controllers/auth.controller";
 import {
   deleteIsMusicReviewRequestHandler,
@@ -36,6 +37,9 @@ export function setupAPIRoutes() {
   app.use(json());
   app.use(logRequestMiddleware);
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+  app.get("/ai/is-music", getIsMusicAiProxyController);
+  app.get("/ai/ner", getNERAIProxyController);
 
   app.post("/auth", authRequestHandler);
   app.post("/register", registerRequestHandler);
