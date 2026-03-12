@@ -27,8 +27,8 @@ import {logRequestMiddleware} from "../middleware/logger.middleware";
 
 export function setupAPIRoutes() {
   const app = express();
-
-  app.use(cors({origin: true, credentials: true}));
+  app.options("*", cors());
+  app.use(cors());
   app.use(
     urlencoded({
       extended: true,
