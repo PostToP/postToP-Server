@@ -55,6 +55,13 @@ export interface Channel {
   yt_id: ChannelYTID;
 }
 
+export interface GenrePrediction {
+  created_at: Generated<Timestamp | null>;
+  genres: string[];
+  submitted_by_id: number;
+  video_id: VideoID;
+}
+
 export interface GenreReview {
   created_at: Generated<Timestamp | null>;
   genres: string[];
@@ -154,6 +161,7 @@ export interface DB {
   category: Category;
   channel: Channel;
   genre_review: GenreReview;
+  genre_prediction: GenrePrediction;
   is_music_video: IsMusicVideo;
   is_music_video_prediction: IsMusicVideoPrediction;
   listened: Listened;

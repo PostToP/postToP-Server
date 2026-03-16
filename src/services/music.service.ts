@@ -1,7 +1,7 @@
 import {MusicQueries} from "../database/queries/music.queries";
 import {VideoQueries} from "../database/queries/video.queries";
 import type {VideoID} from "../model/override";
-import {IsMusicAiService, NERAIService} from "./ai.service";
+import {GenreAiService, IsMusicAiService, NERAIService} from "./ai.service";
 import {VideoService} from "./video.service";
 
 export class MusicService {
@@ -34,5 +34,10 @@ export class MusicService {
   static async getEntitiesInMusic(db_id: VideoID) {
     const ner_entries_ai = await NERAIService.getOrFetch(db_id);
     return ner_entries_ai;
+  }
+
+  static async getGenres(db_id: VideoID) {
+    const genre_ai = await GenreAiService.getOrFetch(db_id);
+    return genre_ai;
   }
 }

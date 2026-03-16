@@ -157,9 +157,22 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
   );
 
   let NER = null;
+  let genres = null;
   if (isMusic.is_music) {
     NER = await MusicService.getEntitiesInMusic(videoID);
     responseVideo.NER = NER as any;
+    ws.send(
+      JSON.stringify({
+        op: ResponseOperationType.VIDEO_UPDATE,
+        d: {
+          video: {
+            ...responseVideo,
+          },
+        },
+      }),
+    );
+    genres = await MusicService.getGenres(videoID);
+    responseVideo.genres = genres as any;
     ws.send(
       JSON.stringify({
         op: ResponseOperationType.VIDEO_UPDATE,

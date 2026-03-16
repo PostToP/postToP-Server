@@ -7,6 +7,7 @@ import {logger} from "../utils/logger";
 
 const AI_MODEL_URL = process.env.AI_MODEL_URL!;
 const AI_MODEL_URL_NER = process.env.AI_MODEL_URL_NER!;
+const AI_MODEL_URL_GENRE = process.env.AI_MODEL_URL_GENRE!;
 
 export class IsMusicAiService {
   private static async fetch(videoID: VideoID) {
@@ -103,6 +104,61 @@ export class NERAIService {
     }
     await VideoQueries.insertNERByAI(videoID, aiUserID?.id, currentResponse.prediction.result);
     return currentResponse.prediction.result;
+  }
+
+  static async fetchPrediction(videoID: VideoID) {
+    return this.fetch(videoID);
+  }
+}
+
+export class GenreAiService {
+  private static async fetch(videoID: VideoID) {
+    const data = await VideoQueries.fetchAiData(videoID);
+    const body = {
+      yt_id: data?.yt_id,
+    };
+
+    const res = await fetchJsonWithRetry<{
+      prediction: {predicted_genres: string[]; yt_id: string};
+      version: string;
+    }>(AI_MODEL_URL_GENRE, {
+      method: "POST",
+      body,
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch genre AI prediction: ${res.error}`);
+    }
+
+    const result = res.data;
+    result.version = result.version.startsWith("v") ? result.version.slice(1) : result.version;
+
+    return result as {
+      prediction: {
+        predicted_genres: string[];
+        yt_id: string;
+      };
+      version: string;
+    };
+  }
+
+  static async getOrFetch(videoID: VideoID) {
+    const genre_ai = await VideoQueries.fetchGenreByAI(videoID);
+    if (genre_ai) {
+      return genre_ai;
+    }
+
+    const currentResponse = await GenreAiService.fetch(videoID);
+    const predictedGenres = currentResponse.prediction.predicted_genres || [];
+    const genres = predictedGenres;
+
+    const aiUserID = await UserQueries.fetchAI(ModelType.GENRE_CLASSIFIER, currentResponse.version);
+    if (!aiUserID) {
+      throw new Error("AI user not found");
+    }
+
+    await VideoQueries.insertGenreByAI(videoID, aiUserID?.id, genres);
+    return genres;
   }
 
   static async fetchPrediction(videoID: VideoID) {

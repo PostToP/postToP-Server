@@ -43,7 +43,14 @@ export class VideoQueries {
         },
         join => join.onRef("video.id", "=", "categories.video_id"),
       )
-      .selectAll()
+      .select([
+        "video.yt_id",
+        "video.duration",
+        "video_metadata.title",
+        "video_metadata.description",
+        "channel.name",
+        "categories.categories",
+      ])
       .where("video.id", "=", id)
       .executeTakeFirst();
   }
@@ -369,6 +376,30 @@ export class VideoQueries {
     return db
       .insertInto("ner_prediction")
       .values(entries)
+      .onConflict(oc => oc.doNothing())
+      .execute();
+  }
+
+  static async fetchGenreByAI(videoID: VideoID) {
+    const db = DatabaseManager.getInstance();
+    const res = await db.selectFrom("genre_prediction").where("video_id", "=", videoID).selectAll().executeTakeFirst();
+
+    if (!res) {
+      return null;
+    }
+
+    return res.genres;
+  }
+
+  static async insertGenreByAI(videoID: VideoID, modelID: number, genres: string[]) {
+    const db = DatabaseManager.getInstance();
+    return db
+      .insertInto("genre_prediction")
+      .values({
+        video_id: videoID,
+        submitted_by_id: modelID,
+        genres: genres,
+      })
       .onConflict(oc => oc.doNothing())
       .execute();
   }

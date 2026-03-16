@@ -67,6 +67,7 @@ export interface VideoResponseData extends WebsocketData {
     user_submission: boolean | null;
   };
   NER?: any[];
+  genres?: string;
 }
 
 export interface ListeningData extends WebsocketData {
