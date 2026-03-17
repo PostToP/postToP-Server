@@ -23,7 +23,7 @@ export class AuthService {
     };
   }
 
-  private static async isValid(username: string, password: string) {
+  public static async isValid(username: string, password: string) {
     const user = await UserQueries.fetchHash(username);
     if (!user) {
       return false;

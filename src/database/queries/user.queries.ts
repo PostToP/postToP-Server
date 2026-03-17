@@ -1,6 +1,8 @@
 import {sql} from "kysely";
 import type {ModelType} from "../../model/db";
 import {DatabaseManager} from "..";
+import bcrypt from "bcrypt";
+
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
@@ -228,5 +230,28 @@ export class UserQueries {
 
     const total_seconds = result?.total_seconds ?? 0;
     return total_seconds / 3600;
+  }
+
+
+  static async updateUserInfo(user_id: number, updates: Partial<{email: string; displayName: string; handle: string; currentPassword: string; newPassword: string}>) {
+    const db = DatabaseManager.getInstance();
+    const updateData: Partial<{email: string; display_name: string; handle: string; password_hash: string}> = {};
+
+    if (updates.email) {
+      updateData.email = updates.email;
+    }
+    if (updates.displayName) {
+      updateData.display_name = updates.displayName;
+    }
+    if (updates.handle) {
+      updateData.handle = updates.handle;
+    }
+    if (updates.newPassword) {
+      updateData.password_hash = bcrypt.hashSync(updates.newPassword, 10);
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await db.updateTable("user").set(updateData).where("id", "=", user_id).execute();
+    }
   }
 }

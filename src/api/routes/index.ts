@@ -18,6 +18,7 @@ import {
   getUserInfoController,
   getUserStatisticsController,
   getUserStatsController,
+  updateUserInfoController,
 } from "../controllers/user.controller";
 import {getVideosController} from "../controllers/video.controller";
 import {getYoutubeArtistChannelController} from "../controllers/youtube.controller";
@@ -49,6 +50,7 @@ export function setupAPIRoutes() {
   app.post("/review/genre", authMiddleware, postGenreReviewRequestHandler);
   app.get("/user/:handle/top", getUserStatisticsController);
   app.get("/user/:handle", getUserInfoController);
+  app.put("/user/:handle", authMiddleware, updateUserInfoController);
   app.get("/user/:handle/history", getUserHistoryController);
   app.get("/user/:handle/stats", getUserStatsController);
   app.get("/videos", getVideosController);
