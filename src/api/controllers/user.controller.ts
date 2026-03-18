@@ -91,3 +91,17 @@ export async function updateUserInfoController(req: Request, res: Response) {
   await UserService.updateUserInfo(userHandle, updateData);
   return res.status(200).json({message: "User information updated successfully"});
 }
+
+export async function deleteUserController(req: Request, res: Response) {
+  const userReq = req as AuthenticatedRequest;
+  const userHandle = req.params.handle;
+
+  const user = await UserQueries.fetchBy(userHandle, "handle");
+
+  if (user?.id !== userReq.userID) {
+    return res.status(403).json({message: "You can only delete your own account"});
+  }
+
+  await UserService.deleteUser(userHandle);
+  return res.status(200).json({message: "User account deleted successfully"});
+}

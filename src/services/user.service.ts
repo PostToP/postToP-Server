@@ -90,4 +90,10 @@ export class UserService {
 
     await UserQueries.updateUserInfo(user.id, updates);
   }
+
+  static async deleteUser(userHandle: string) {
+    const user = await UserQueries.fetchBy(userHandle, "handle");
+    if (!user) throw new InvalidUserError("User not found");
+    await UserQueries.deleteUser(user.id);
+  }
 }

@@ -254,4 +254,9 @@ export class UserQueries {
       await db.updateTable("user").set(updateData).where("id", "=", user_id).execute();
     }
   }
+
+  static async deleteUser(user_id: number) {
+    const db = DatabaseManager.getInstance();
+    await db.deleteFrom("user").where("id", "=", user_id).execute();
+  }
 }
