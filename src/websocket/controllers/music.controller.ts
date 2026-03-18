@@ -171,18 +171,21 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
         },
       }),
     );
-    genres = await MusicService.getGenres(videoID);
-    responseVideo.genres = genres as any;
-    ws.send(
-      JSON.stringify({
-        op: ResponseOperationType.VIDEO_UPDATE,
-        d: {
-          video: {
-            ...responseVideo,
+    (async () => {
+      // the evesdroppers don't need to wait for genre prediction
+      genres = await MusicService.getGenres(videoID);
+      responseVideo.genres = genres as any;
+      ws.send(
+        JSON.stringify({
+          op: ResponseOperationType.VIDEO_UPDATE,
+          d: {
+            video: {
+              ...responseVideo,
+            },
           },
-        },
-      }),
-    );
+        }),
+      );
+    })();
   }
 
   const listeningData: ListeningData = {
