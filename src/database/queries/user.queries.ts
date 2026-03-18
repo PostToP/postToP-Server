@@ -43,6 +43,7 @@ export class UserQueries {
       .innerJoin("channel as c", "v.channel_id", "c.id")
       .innerJoin("video_category as vc", "v.id", "vc.video_id")
       .innerJoin("category as cat", "vc.category_id", "cat.id")
+      .innerJoin("genre_prediction as gp", "v.id", "gp.video_id")
       .leftJoin(
         db
           .selectFrom(
@@ -121,14 +122,13 @@ export class UserQueries {
   }
 
   static async getTopGenres(user_id: number, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
-    // TODO: with new category system
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
     query = query
-      .groupBy(["cat.id", "cat.name"])
+      .groupBy([sql`(gp.genres)[1]`])
       .select(eb => [
-        eb.ref("cat.name").as("genre_name"),
-        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
+      sql<string>`(gp.genres)[1]`.as("genre_name"),
+      db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
       .limit(limit ?? 10)
