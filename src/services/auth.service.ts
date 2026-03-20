@@ -11,6 +11,7 @@ export class AuthService {
       throw new InvalidUserError("Invalid username or password");
     }
     const user = await UserQueries.fetchBy(username, "username");
+    const role = await UserQueries.getUserRole(user!.id);
     const token = jwt.sign({userId: user?.id}, jwtToken, {expiresIn: "90d"});
     return {
       token: token,
@@ -19,6 +20,7 @@ export class AuthService {
         username: user?.username,
         handle: user?.handle,
         email: user?.mail,
+        role: role,
       },
     };
   }

@@ -3,7 +3,6 @@ import type {ModelType} from "../../model/db";
 import {DatabaseManager} from "..";
 import bcrypt from "bcrypt";
 
-
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
     const db = DatabaseManager.getInstance();
@@ -19,6 +18,17 @@ export class UserQueries {
       .where("type", "=", type)
       .where("version", "=", version)
       .executeTakeFirst();
+  }
+
+  static async getUserRole(user_id: number) {
+    const db = DatabaseManager.getInstance();
+    const result = await db
+      .selectFrom("user_role")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .select("role.name")
+      .where("user_id", "=", user_id)
+      .executeTakeFirst();
+    return result?.name;
   }
 
   static async fetchHash(username: string) {
@@ -127,8 +137,8 @@ export class UserQueries {
     query = query
       .groupBy([sql`(gp.genres)[1]`])
       .select(eb => [
-      sql<string>`(gp.genres)[1]`.as("genre_name"),
-      db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
+        sql<string>`(gp.genres)[1]`.as("genre_name"),
+        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
       ])
       .orderBy("listen_count", "desc")
       .limit(limit ?? 10)
@@ -232,8 +242,16 @@ export class UserQueries {
     return total_seconds / 3600;
   }
 
-
-  static async updateUserInfo(user_id: number, updates: Partial<{email: string; displayName: string; handle: string; currentPassword: string; newPassword: string}>) {
+  static async updateUserInfo(
+    user_id: number,
+    updates: Partial<{
+      email: string;
+      displayName: string;
+      handle: string;
+      currentPassword: string;
+      newPassword: string;
+    }>,
+  ) {
     const db = DatabaseManager.getInstance();
     const updateData: Partial<{email: string; display_name: string; handle: string; password_hash: string}> = {};
 
