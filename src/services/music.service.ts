@@ -1,4 +1,5 @@
 import {MusicQueries} from "../database/queries/music.queries";
+import { UserQueries } from "../database/queries/user.queries";
 import {VideoQueries} from "../database/queries/video.queries";
 import type {VideoID} from "../model/override";
 import {GenreAiService, IsMusicAiService, NERAIService} from "./ai.service";
@@ -9,6 +10,11 @@ export class MusicService {
     const videoID = await VideoService.getOrFetch(watchID);
 
     if ((await MusicService.getVideoIsMusic(videoID)) == null) {
+      return false;
+    }
+
+    const exists = await UserQueries.fetchBy(userID, "id");
+    if (!exists) {
       return false;
     }
 

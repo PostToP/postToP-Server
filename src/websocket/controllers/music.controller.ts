@@ -75,7 +75,17 @@ async function listenedToMusicWebsocketHandler(ws: ExtendedWebSocketConnection, 
     logger.error("ws.userId is undefined in listenedToMusicWebsocketHandler");
     return;
   }
-  MusicService.recordListened(data.watchID, ws.userId);
+  const res = await MusicService.recordListened(data.watchID, ws.userId);
+  if (!res) {
+    ws.send(
+      JSON.stringify({
+        op: ResponseOperationType.ERROR,
+        d: {message: "Failed to record listened music"},
+      }),
+    );
+    logger.error(`User ${ws.userId} failed to listen to music`);
+    return;
+  }
   announceSongToEvedroppers(ws.userId);
   ws.send(
     JSON.stringify({
