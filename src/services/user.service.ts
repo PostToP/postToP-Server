@@ -1,6 +1,6 @@
 import {UserQueries} from "../database/queries/user.queries";
 import {InvalidUserError} from "../interface/errors";
-import { AuthService } from "./auth.service";
+import {AuthService} from "./auth.service";
 
 export class UserService {
   static async getUserInfo(userHandle: string) {
@@ -63,21 +63,35 @@ export class UserService {
     return data;
   }
 
-  static async updateUserInfo(userHandle: string, updates: Partial<{email: string; displayName: string; handle: string; currentPassword: string; newPassword: string}>) {
+  static async updateUserInfo(
+    userHandle: string,
+    updates: Partial<{
+      email: string;
+      displayName: string;
+      handle: string;
+      currentPassword: string;
+      newPassword: string;
+    }>,
+  ) {
     const user = await UserQueries.fetchBy(userHandle, "handle");
-    
+
     if (!user) throw new InvalidUserError("User not found");
-    
+
     if (updates.handle && updates.handle !== user.handle) {
       const existingHandle = await UserQueries.fetchBy(updates.handle, "handle");
       if (existingHandle) throw new InvalidUserError("Handle already exists");
     }
-    
+
     if (updates.email && updates.email !== user.mail) {
       const existingEmail = await UserQueries.fetchBy(updates.email, "mail");
       if (existingEmail) throw new InvalidUserError("Email already exists");
     }
-    
+
+    if (updates.displayName && updates.displayName !== user.username) {
+      const existingDisplayName = await UserQueries.fetchBy(updates.displayName, "username");
+      if (existingDisplayName) throw new InvalidUserError("User name already exists");
+    }
+
     if (updates.newPassword) {
       if (!updates.currentPassword) {
         throw new InvalidUserError("Current password is required to set a new password");

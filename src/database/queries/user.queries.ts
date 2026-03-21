@@ -260,13 +260,13 @@ export class UserQueries {
     }>,
   ) {
     const db = DatabaseManager.getInstance();
-    const updateData: Partial<{email: string; display_name: string; handle: string; password_hash: string}> = {};
+    const updateData: Partial<{mail: string; username: string; handle: string; password_hash: string}> = {};
 
     if (updates.email) {
-      updateData.email = updates.email;
+      updateData.mail = updates.email;
     }
     if (updates.displayName) {
-      updateData.display_name = updates.displayName;
+      updateData.username = updates.displayName;
     }
     if (updates.handle) {
       updateData.handle = updates.handle;
