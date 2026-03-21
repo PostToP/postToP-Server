@@ -14,6 +14,7 @@ import {
 } from "../controllers/review.controller";
 import {getServerStatsController} from "../controllers/stat.controller";
 import {
+  deleteUserController,
   getUserHistoryController,
   getUserInfoController,
   getUserStatisticsController,
@@ -51,6 +52,7 @@ export function setupAPIRoutes() {
   app.get("/user/:handle/top", getUserStatisticsController);
   app.get("/user/:handle", getUserInfoController);
   app.put("/user/:handle", authMiddleware, updateUserInfoController);
+  app.delete("/user/:handle", authMiddleware, deleteUserController);
   app.get("/user/:handle/history", getUserHistoryController);
   app.get("/user/:handle/stats", getUserStatsController);
   app.get("/videos", getVideosController);
