@@ -116,10 +116,11 @@ export class GenreAiService {
     const data = await VideoQueries.fetchAiData(videoID);
     const body = {
       yt_id: data?.yt_id,
+      duration: data?.duration,
     };
 
     const res = await fetchJsonWithRetry<{
-      prediction: {predicted_genres: string[]; yt_id: string};
+      prediction: {predicted_genres: string[]; yt_id: string; aggregated_logits: Record<string, number>};
       version: string;
     }>(AI_MODEL_URL_GENRE, {
       method: "POST",
@@ -136,6 +137,7 @@ export class GenreAiService {
     return result as {
       prediction: {
         predicted_genres: string[];
+        aggregated_logits: Record<string, number>;
         yt_id: string;
       };
       version: string;
@@ -157,8 +159,11 @@ export class GenreAiService {
       throw new Error("AI user not found");
     }
 
-    await VideoQueries.insertGenreByAI(videoID, aiUserID?.id, genres);
-    return genres;
+    await VideoQueries.insertGenreByAI(videoID, aiUserID?.id, genres, currentResponse.prediction.aggregated_logits);
+    return {
+      genres,
+      aggregated_logits: currentResponse.prediction.aggregated_logits,
+    };
   }
 
   static async fetchPrediction(videoID: VideoID) {

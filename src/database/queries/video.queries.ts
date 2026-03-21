@@ -388,10 +388,18 @@ export class VideoQueries {
       return null;
     }
 
-    return res.genres;
+    return {
+      genres: res.genres,
+      aggregated_logits: res.genres_logits,
+    };
   }
 
-  static async insertGenreByAI(videoID: VideoID, modelID: number, genres: string[]) {
+  static async insertGenreByAI(
+    videoID: VideoID,
+    modelID: number,
+    genres: string[],
+    aggregated_logits: Record<string, number>,
+  ) {
     const db = DatabaseManager.getInstance();
     return db
       .insertInto("genre_prediction")
@@ -399,6 +407,7 @@ export class VideoQueries {
         video_id: videoID,
         submitted_by_id: modelID,
         genres: genres,
+        genres_logits: aggregated_logits,
       })
       .onConflict(oc => oc.doNothing())
       .execute();

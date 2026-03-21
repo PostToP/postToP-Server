@@ -1,7 +1,7 @@
+import bcrypt from "bcrypt";
 import {sql} from "kysely";
 import type {ModelType} from "../../model/db";
 import {DatabaseManager} from "..";
-import bcrypt from "bcrypt";
 
 export class UserQueries {
   static async fetchBy(identifier: string | number, type: "username" | "handle" | "id" | "mail") {
@@ -53,7 +53,7 @@ export class UserQueries {
       .innerJoin("channel as c", "v.channel_id", "c.id")
       .innerJoin("video_category as vc", "v.id", "vc.video_id")
       .innerJoin("category as cat", "vc.category_id", "cat.id")
-      .innerJoin("genre_prediction as gp", "v.id", "gp.video_id")
+      .leftJoin("genre_prediction as gp", "v.id", "gp.video_id")
       .leftJoin(
         db
           .selectFrom(
@@ -134,16 +134,23 @@ export class UserQueries {
   static async getTopGenres(user_id: number, startDate?: Date, endDate?: Date, limit?: number, offset?: number) {
     const db = DatabaseManager.getInstance();
     let query = UserQueries.getListenedAll(user_id, startDate, endDate);
+    const genreEntries = sql<{
+      key: string;
+      value: string;
+    }>`jsonb_each_text(COALESCE(gp.genres_logits, (SELECT jsonb_object_agg(g, 1) FROM unnest(gp.genres) AS g)))`.as(
+      "genre",
+    );
+
     query = query
-      .groupBy([sql`(gp.genres)[1]`])
-      .select(eb => [
-        sql<string>`(gp.genres)[1]`.as("genre_name"),
-        db.fn.count<number>(sql.ref("listened.listened_at")).distinct().as("listen_count"),
+      .innerJoin(genreEntries, join => join.onTrue())
+      .select(() => [
+        sql<string>`genre.key`.as("genre_name"),
+        sql<number>`SUM((genre.value)::float)`.as("listen_count"),
       ])
+      .groupBy("genre.key")
       .orderBy("listen_count", "desc")
       .limit(limit ?? 10)
       .offset(offset ?? 0);
-
     return query.execute();
   }
 

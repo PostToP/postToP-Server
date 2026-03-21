@@ -60,6 +60,7 @@ export interface GenrePrediction {
   genres: string[];
   submitted_by_id: number;
   video_id: VideoID;
+  genres_logits: Json;
 }
 
 export interface GenreReview {
