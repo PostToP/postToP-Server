@@ -280,6 +280,130 @@ export class VideoQueries {
     return totalCount.total_count as number;
   }
 
+  static async numberOfReviewedVideos() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("video")
+      .innerJoin("is_music_video", "video.id", "is_music_video.video_id")
+      .innerJoin("user_role", "is_music_video.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .where("role.name", "=", "Admin")
+      .select(_eb => [sql`count(distinct video.id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfPredictedVideos() {
+    const db = DatabaseManager.getInstance();
+    const reviewedVideos = db
+      .selectFrom("is_music_video")
+      .innerJoin("user_role", "is_music_video.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .select("is_music_video.video_id")
+      .where("role.name", "=", "Admin")
+      .groupBy("is_music_video.video_id")
+      .as("reviewed_videos");
+
+    const totalCount = await db
+      .selectFrom("video")
+      .innerJoin("is_music_video_prediction", "video.id", "is_music_video_prediction.video_id")
+      .leftJoin(reviewedVideos, "reviewed_videos.video_id", "video.id")
+      .where("reviewed_videos.video_id", "is", null)
+      .select(_eb => [sql`count(distinct video.id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfVideosTotal() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("video")
+      .select(_eb => [sql`count(*)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfReviewedGenres() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("genre_review")
+      .innerJoin("user_role", "genre_review.user_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .where("role.name", "=", "Admin")
+      .select(_eb => [sql`count(distinct genre_review.video_id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfPredictedGenres() {
+    const db = DatabaseManager.getInstance();
+    const reviewedGenres = db
+      .selectFrom("genre_review")
+      .innerJoin("user_role", "genre_review.user_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .select("genre_review.video_id")
+      .where("role.name", "=", "Admin")
+      .groupBy("genre_review.video_id")
+      .as("reviewed_genres");
+
+    const totalCount = await db
+      .selectFrom("genre_prediction")
+      .leftJoin(reviewedGenres, "reviewed_genres.video_id", "genre_prediction.video_id")
+      .where("reviewed_genres.video_id", "is", null)
+      .select(_eb => [sql`count(distinct genre_prediction.video_id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfReviewedNER() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("ner_result")
+      .innerJoin("user_role", "ner_result.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .where("role.name", "=", "Admin")
+      .select(_eb => [sql`count(distinct ner_result.video_id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfPredictedNER() {
+    const db = DatabaseManager.getInstance();
+    const reviewedNER = db
+      .selectFrom("ner_result")
+      .innerJoin("user_role", "ner_result.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .select("ner_result.video_id")
+      .where("role.name", "=", "Admin")
+      .groupBy("ner_result.video_id")
+      .as("reviewed_ner");
+
+    const totalCount = await db
+      .selectFrom("ner_prediction")
+      .leftJoin(reviewedNER, "reviewed_ner.video_id", "ner_prediction.video_id")
+      .where("reviewed_ner.video_id", "is", null)
+      .select(_eb => [sql`count(distinct ner_prediction.video_id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+
+    return totalCount.total_count as number;
+  }
+
+  static async numberOfVideosPredicted() {
+    const db = DatabaseManager.getInstance();
+    const totalCount = await db
+      .selectFrom("video")
+      .innerJoin("is_music_video_prediction", "video.id", "is_music_video_prediction.video_id")
+      .select(_eb => [sql`count(distinct video.id)`.as("total_count")])
+      .executeTakeFirstOrThrow();
+    return totalCount.total_count as number;
+  }
+
   static async insertNERReview(
     videoID: VideoID,
     userID: number,
