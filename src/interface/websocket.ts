@@ -50,6 +50,7 @@ export interface VideoRequestData extends WebsocketData {
   watchID: string;
   currentTime: number;
   status: VideoStatus;
+  updatedAt: Date;
 }
 
 export interface VideoResponseData extends WebsocketData {

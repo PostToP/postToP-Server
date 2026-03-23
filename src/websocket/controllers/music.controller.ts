@@ -154,55 +154,29 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
     reviewed: isMusic.reviewed,
     user_submission: userSubmittedIsMusic ? userSubmittedIsMusic.is_music : null,
   };
-
-  ws.send(
-    JSON.stringify({
-      op: ResponseOperationType.VIDEO_UPDATE,
-      d: {
-        video: {
-          ...responseVideo,
-        },
-      },
-    }),
-  );
-
-  let NER = null;
-  let genres = null;
-  if (isMusic.is_music) {
-    NER = await MusicService.getEntitiesInMusic(videoID);
-    responseVideo.NER = NER as any;
-    ws.send(
-      JSON.stringify({
-        op: ResponseOperationType.VIDEO_UPDATE,
-        d: {
-          video: {
-            ...responseVideo,
-          },
-        },
-      }),
-    );
-    (async () => {
-      // the evesdroppers don't need to wait for genre prediction
-      genres = await MusicService.getGenres(videoID);
-      responseVideo.genres = genres as any;
-      ws.send(
-        JSON.stringify({
-          op: ResponseOperationType.VIDEO_UPDATE,
-          d: {
-            video: {
-              ...responseVideo,
-            },
-          },
-        }),
-      );
-    })();
-  }
-
   const listeningData: ListeningData = {
     currentTime: data.currentTime,
     status: data.status,
     updatedAt: new Date(),
   };
+  ws.currentlyPlayingData = {
+    video: responseVideo,
+    listeningData: listeningData,
+  };
+  updateClientWithMusicData(ws, responseVideo);
+
+  let NER = null;
+  if (isMusic.is_music) {
+    (async () => {
+      // the evesdroppers don't need to wait for genre prediction
+      const genres = await MusicService.getGenres(videoID);
+      responseVideo.genres = genres as any;
+      updateClientWithMusicData(ws, responseVideo);
+    })();
+    NER = await MusicService.getEntitiesInMusic(videoID);
+    responseVideo.NER = NER as any;
+    updateClientWithMusicData(ws, responseVideo);
+  }
 
   ws.currentlyPlayingData = {
     video: responseVideo,
@@ -220,4 +194,16 @@ async function startedListeningToMusicWebsocketHandler(ws: ExtendedWebSocketConn
   responseVideo.isMusic.user_submission = null;
 
   announceSongToEvedroppers(ws.userId);
+}
+
+async function updateClientWithMusicData(ws: ExtendedWebSocketConnection, video: VideoResponseData) {
+  if (ws.currentlyPlayingData?.video.watchID !== video.watchID) return;
+  ws.send(
+    JSON.stringify({
+      op: ResponseOperationType.VIDEO_UPDATE,
+      d: {
+        video: video,
+      },
+    }),
+  );
 }
