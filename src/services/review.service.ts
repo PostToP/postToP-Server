@@ -49,4 +49,20 @@ export class ReviewService {
     const review = await VideoQueries.insertGenreReview(db_id.id, userID, genres);
     return review;
   }
+
+  static async removeNERReview(videoID: string, userID: number) {
+    const db_id = await VideoQueries.fetch(videoID);
+    if (!db_id) {
+      throw new Error("Video not found");
+    }
+    await VideoQueries.removeNERReview(db_id.id, userID);
+  }
+
+  static async removeGenreReview(videoID: string, userID: number) {
+    const db_id = await VideoQueries.fetch(videoID);
+    if (!db_id) {
+      throw new Error("Video not found");
+    }
+    await VideoQueries.removeGenreReview(db_id.id, userID);
+  }
 }

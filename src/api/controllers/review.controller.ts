@@ -50,6 +50,15 @@ export async function postNERReviewRequestHandler(req: Request, res: Response) {
   return res.status(200).json({message: "NER Review added successfully"});
 }
 
+export async function deleteNERReviewRequestHandler(req: Request, res: Response) {
+  const userReq = req as AuthenticatedRequest;
+  const userID = userReq.userID;
+  const {watchID} = NERReviewSchema.parse(req.body);
+
+  await ReviewService.removeNERReview(watchID, userID);
+  return res.status(200).json({message: "NER Review removed successfully"});
+}
+
 const GenreReviewSchema = z.object({
   watchID: z.string().min(1),
   genres: z.array(z.string().min(1)),
@@ -63,4 +72,13 @@ export async function postGenreReviewRequestHandler(req: Request, res: Response)
 
   await ReviewService.addGenreReview(watchID, userID, genres);
   return res.status(200).json({message: "Genre Review added successfully"});
+}
+
+export async function deleteGenreReviewRequestHandler(req: Request, res: Response) {
+  const userReq = req as AuthenticatedRequest;
+  const userID = userReq.userID;
+  const {watchID} = GenreReviewSchema.parse(req.body);
+
+  await ReviewService.removeGenreReview(watchID, userID);
+  return res.status(200).json({message: "Genre Review removed successfully"});
 }

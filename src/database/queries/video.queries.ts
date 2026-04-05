@@ -536,4 +536,14 @@ export class VideoQueries {
       .onConflict(oc => oc.doNothing())
       .execute();
   }
+
+  static async removeNERReview(videoID: VideoID, userID: number) {
+    const db = DatabaseManager.getInstance();
+    return db.deleteFrom("ner_result").where("video_id", "=", videoID).where("submitted_by_id", "=", userID).execute();
+  }
+
+  static async removeGenreReview(videoID: VideoID, userID: number) {
+    const db = DatabaseManager.getInstance();
+    return db.deleteFrom("genre_review").where("video_id", "=", videoID).where("user_id", "=", userID).execute();
+  }
 }

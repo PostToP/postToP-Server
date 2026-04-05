@@ -7,7 +7,9 @@ import {swaggerSpec} from "../../utils/swagger";
 import {getIsMusicAiProxyController, getNERAIProxyController} from "../controllers/ai.controller";
 import {authRequestHandler, registerRequestHandler} from "../controllers/auth.controller";
 import {
+  deleteGenreReviewRequestHandler,
   deleteIsMusicReviewRequestHandler,
+  deleteNERReviewRequestHandler,
   postGenreReviewRequestHandler,
   postIsMusicReviewRequestHandler,
   postNERReviewRequestHandler,
@@ -48,7 +50,9 @@ export function setupAPIRoutes() {
   app.post("/review/music", authMiddleware, postIsMusicReviewRequestHandler);
   app.delete("/review/music", authMiddleware, deleteIsMusicReviewRequestHandler);
   app.post("/review/ner", authMiddleware, postNERReviewRequestHandler);
+  app.delete("/review/ner", authMiddleware, deleteNERReviewRequestHandler);
   app.post("/review/genre", authMiddleware, postGenreReviewRequestHandler);
+  app.delete("/review/genre", authMiddleware, deleteGenreReviewRequestHandler);
   app.get("/user/:handle/top", getUserStatisticsController);
   app.get("/user/:handle", getUserInfoController);
   app.put("/user/:handle", authMiddleware, updateUserInfoController);
