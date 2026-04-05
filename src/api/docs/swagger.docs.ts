@@ -102,6 +102,12 @@
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/NEREntity'
+ *     DeleteNERReviewRequest:
+ *       type: object
+ *       required: [watchID]
+ *       properties:
+ *         watchID:
+ *           type: string
  *     GenreReviewRequest:
  *       type: object
  *       required: [watchID, genres]
@@ -112,6 +118,12 @@
  *           type: array
  *           items:
  *             type: string
+ *     DeleteGenreReviewRequest:
+ *       type: object
+ *       required: [watchID]
+ *       properties:
+ *         watchID:
+ *           type: string
  *     UpdateUserRequest:
  *       type: object
  *       properties:
@@ -251,6 +263,24 @@
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/MessageResponse'
+ *     delete:
+ *       tags: [Reviews]
+ *       summary: Remove NER review
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DeleteNERReviewRequest'
+ *       responses:
+ *         '200':
+ *           description: Review removed
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/MessageResponse'
  *   /review/genre:
  *     post:
  *       tags: [Reviews]
@@ -266,6 +296,24 @@
  *       responses:
  *         '200':
  *           description: Review saved
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/MessageResponse'
+ *     delete:
+ *       tags: [Reviews]
+ *       summary: Remove genre review
+ *       security:
+ *         - bearerAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DeleteGenreReviewRequest'
+ *       responses:
+ *         '200':
+ *           description: Review removed
  *           content:
  *             application/json:
  *               schema:

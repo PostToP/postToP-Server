@@ -39,12 +39,14 @@ const NERReviewSchema = z.object({
   ),
 });
 
+const DeleteNERReviewSchema = z.object({
+  watchID: z.string().min(1),
+});
+
 export async function postNERReviewRequestHandler(req: Request, res: Response) {
   const userReq = req as AuthenticatedRequest;
   const userID = userReq.userID;
-
-  // const { watchID, language, namedEntities } = NERReviewSchema.parse(req.body);
-  const {watchID, language, namedEntities} = req.body;
+  const {watchID, language, namedEntities} = NERReviewSchema.parse(req.body);
 
   await ReviewService.addNERReview(watchID, userID, language, namedEntities);
   return res.status(200).json({message: "NER Review added successfully"});
@@ -53,7 +55,7 @@ export async function postNERReviewRequestHandler(req: Request, res: Response) {
 export async function deleteNERReviewRequestHandler(req: Request, res: Response) {
   const userReq = req as AuthenticatedRequest;
   const userID = userReq.userID;
-  const {watchID} = NERReviewSchema.parse(req.body);
+  const {watchID} = DeleteNERReviewSchema.parse(req.body);
 
   await ReviewService.removeNERReview(watchID, userID);
   return res.status(200).json({message: "NER Review removed successfully"});
@@ -62,6 +64,10 @@ export async function deleteNERReviewRequestHandler(req: Request, res: Response)
 const GenreReviewSchema = z.object({
   watchID: z.string().min(1),
   genres: z.array(z.string().min(1)),
+});
+
+const DeleteGenreReviewSchema = z.object({
+  watchID: z.string().min(1),
 });
 
 export async function postGenreReviewRequestHandler(req: Request, res: Response) {
@@ -77,7 +83,7 @@ export async function postGenreReviewRequestHandler(req: Request, res: Response)
 export async function deleteGenreReviewRequestHandler(req: Request, res: Response) {
   const userReq = req as AuthenticatedRequest;
   const userID = userReq.userID;
-  const {watchID} = GenreReviewSchema.parse(req.body);
+  const {watchID} = DeleteGenreReviewSchema.parse(req.body);
 
   await ReviewService.removeGenreReview(watchID, userID);
   return res.status(200).json({message: "Genre Review removed successfully"});
