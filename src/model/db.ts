@@ -56,7 +56,7 @@ export interface Channel {
 }
 
 export interface GenrePrediction {
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   genres: string[];
   submitted_by_id: number;
   video_id: VideoID;
@@ -64,7 +64,7 @@ export interface GenrePrediction {
 }
 
 export interface GenreReview {
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   genres: string[];
   id: Generated<number>;
   user_id: number | null;
