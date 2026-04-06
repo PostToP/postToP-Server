@@ -546,4 +546,63 @@ export class VideoQueries {
     const db = DatabaseManager.getInstance();
     return db.deleteFrom("genre_review").where("video_id", "=", videoID).where("user_id", "=", userID).execute();
   }
+
+  static async fetchAdminActivityLogs() {
+    const db = DatabaseManager.getInstance();
+    const genreReviews = await db
+      .selectFrom("genre_review")
+      .innerJoin("user", "genre_review.user_id", "user.id")
+      .innerJoin("user_role", "genre_review.user_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .innerJoin("video", "genre_review.video_id", "video.id")
+      .innerJoin("video_metadata", join =>
+        join
+          .onRef("video.id", "=", "video_metadata.video_id")
+          .onRef("video.default_language", "=", "video_metadata.language"),
+      )
+      .where("role.name", "=", "Admin")
+      .select(["user.username", "genre_review.created_at", "video_metadata.title", "genre_review.genres"])
+      .orderBy("genre_review.created_at", "desc")
+      .limit(20)
+      .execute();
+    const nerReviews = await db
+      .selectFrom("ner_result")
+      .innerJoin("user", "ner_result.submitted_by_id", "user.id")
+      .innerJoin("user_role", "ner_result.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .innerJoin("video", "ner_result.video_id", "video.id")
+      .innerJoin("video_metadata", join =>
+        join
+          .onRef("video.id", "=", "video_metadata.video_id")
+          .onRef("video.default_language", "=", "video_metadata.language"),
+      )
+      .where("role.name", "=", "Admin")
+      .select(["user.username", "ner_result.created_at", "video_metadata.title", "ner_result.ner_result"])
+      .orderBy("ner_result.created_at", "desc")
+      .limit(20)
+      .execute();
+
+    const isMusicReviews = await db
+      .selectFrom("is_music_video")
+      .innerJoin("user", "is_music_video.submitted_by_id", "user.id")
+      .innerJoin("user_role", "is_music_video.submitted_by_id", "user_role.user_id")
+      .innerJoin("role", "user_role.role_id", "role.id")
+      .innerJoin("video", "is_music_video.video_id", "video.id")
+      .innerJoin("video_metadata", join =>
+        join
+          .onRef("video.id", "=", "video_metadata.video_id")
+          .onRef("video.default_language", "=", "video_metadata.language"),
+      )
+      .where("role.name", "=", "Admin")
+      .select(["user.username", "is_music_video.created_at", "video_metadata.title", "is_music_video.is_music"])
+      .orderBy("is_music_video.created_at", "desc")
+      .limit(20)
+      .execute();
+
+    const activityLogs = [...genreReviews, ...nerReviews, ...isMusicReviews].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    return activityLogs.slice(0, 20);
+  }
 }

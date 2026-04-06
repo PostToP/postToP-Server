@@ -88,3 +88,8 @@ export async function deleteGenreReviewRequestHandler(req: Request, res: Respons
   await ReviewService.removeGenreReview(watchID, userID);
   return res.status(200).json({message: "Genre Review removed successfully"});
 }
+
+export async function getAdminActivityLogsController(req: Request, res: Response) {
+  const activityLogs = await ReviewService.getAdminActivityLogs();
+  return res.status(200).json({status: "ok", data: activityLogs});
+}

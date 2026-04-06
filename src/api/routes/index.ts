@@ -10,6 +10,7 @@ import {
   deleteGenreReviewRequestHandler,
   deleteIsMusicReviewRequestHandler,
   deleteNERReviewRequestHandler,
+  getAdminActivityLogsController,
   postGenreReviewRequestHandler,
   postIsMusicReviewRequestHandler,
   postNERReviewRequestHandler,
@@ -25,6 +26,7 @@ import {
 } from "../controllers/user.controller";
 import {getVideosController} from "../controllers/video.controller";
 import {getYoutubeArtistChannelController} from "../controllers/youtube.controller";
+import {adminMiddleware} from "../middleware/admin.middleware";
 import {authMiddleware} from "../middleware/auth.middleware";
 import {processErrorMiddleware} from "../middleware/error.middleware";
 import {logRequestMiddleware} from "../middleware/logger.middleware";
@@ -62,6 +64,7 @@ export function setupAPIRoutes() {
   app.get("/videos", getVideosController);
   app.get("/youtube/artist-channel", authMiddleware, getYoutubeArtistChannelController);
   app.get("/stats", getServerStatsController);
+  app.get("/admin/activity-logs", authMiddleware, adminMiddleware, getAdminActivityLogsController);
 
   app.use(processErrorMiddleware);
   return app;

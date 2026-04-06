@@ -65,4 +65,9 @@ export class ReviewService {
     }
     await VideoQueries.removeGenreReview(db_id.id, userID);
   }
+
+  static async getAdminActivityLogs() {
+    const activityLogs = await VideoQueries.fetchAdminActivityLogs();
+    return activityLogs;
+  }
 }
